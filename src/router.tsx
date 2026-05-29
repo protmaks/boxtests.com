@@ -29,6 +29,5 @@ export const router = createBrowserRouter(
         { path: 'manage/difficulty', element: <ManageDifficultyPage /> },
       ],
     },
-  ],
-  { basename: '/boxtests.com/' }
+  ]
 );
