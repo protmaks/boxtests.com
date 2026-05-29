@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS test_groups (
 CREATE TABLE IF NOT EXISTS test_subgroups (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
-  group_id INTEGER NOT NULL REFERENCES test_groups(id) ON DELETE CASCADE,
+  group_id INTEGER NOT NULL,
   description TEXT,
   color TEXT DEFAULT '#28a745'
 );
@@ -22,17 +22,17 @@ CREATE TABLE IF NOT EXISTS difficulty_levels (
   name TEXT NOT NULL,
   color TEXT DEFAULT '#667eea',
   description TEXT,
-  group_id INTEGER NOT NULL REFERENCES test_groups(id) ON DELETE CASCADE
+  group_id INTEGER NOT NULL
 );
 
 -- Tests
 CREATE TABLE IF NOT EXISTS tests (
   test_id INTEGER PRIMARY KEY,
   display_name TEXT NOT NULL,
-  group_id INTEGER REFERENCES test_groups(id) ON DELETE SET NULL,
-  subgroup_id INTEGER REFERENCES test_subgroups(id) ON DELETE SET NULL,
+  group_id INTEGER,
+  subgroup_id INTEGER,
   tags TEXT,
-  difficulty_level_id INTEGER REFERENCES difficulty_levels(id) ON DELETE SET NULL,
+  difficulty_level_id INTEGER,
   description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS tests (
 CREATE TABLE IF NOT EXISTS questions (
   id INTEGER PRIMARY KEY,
   question_text TEXT NOT NULL,
-  test_id INTEGER NOT NULL REFERENCES tests(test_id) ON DELETE CASCADE,
+  test_id INTEGER NOT NULL,
   explanation TEXT,
   question_group_id INTEGER
 );
@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS questions (
 -- Question options (normalized from original schema)
 CREATE TABLE IF NOT EXISTS question_options (
   id INTEGER PRIMARY KEY,
-  question_id INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
-  test_id INTEGER NOT NULL REFERENCES tests(test_id) ON DELETE CASCADE,
+  question_id INTEGER NOT NULL,
+  test_id INTEGER NOT NULL,
   option_letter TEXT NOT NULL,
   option_text TEXT NOT NULL,
   is_correct BOOLEAN DEFAULT FALSE
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS question_options (
 -- Test statistics
 CREATE TABLE IF NOT EXISTS test_statistics (
   id INTEGER PRIMARY KEY,
-  test_id INTEGER NOT NULL UNIQUE REFERENCES tests(test_id) ON DELETE CASCADE,
+  test_id INTEGER NOT NULL UNIQUE,
   total_attempts INTEGER DEFAULT 0,
   total_correct INTEGER DEFAULT 0,
   total_incorrect INTEGER DEFAULT 0,
@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS test_statistics (
 -- Session answers (for tracking progress in instant mode)
 CREATE TABLE IF NOT EXISTS session_answers (
   id INTEGER PRIMARY KEY,
-  test_id INTEGER NOT NULL REFERENCES tests(test_id) ON DELETE CASCADE,
-  question_id INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  test_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
   selected_options TEXT,
   is_correct BOOLEAN,
   status TEXT DEFAULT 'answered',
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS session_answers (
 -- Media blobs (for storing images)
 CREATE TABLE IF NOT EXISTS media_blobs (
   id INTEGER PRIMARY KEY,
-  test_id INTEGER NOT NULL REFERENCES tests(test_id) ON DELETE CASCADE,
+  test_id INTEGER NOT NULL,
   filename TEXT NOT NULL,
   mime_type TEXT NOT NULL,
   data BLOB NOT NULL,
