@@ -15,7 +15,6 @@ export interface Question {
   question_text: string;
   test_id: number;
   explanation: string | null;
-  question_group_id: number | null;
 }
 
 export interface QuestionOption {
@@ -24,7 +23,7 @@ export interface QuestionOption {
   test_id: number;
   option_letter: string;
   option_text: string;
-  is_correct: boolean;
+  is_correct: boolean | string; // DuckDB may return as string
 }
 
 export interface TestGroup {
@@ -54,20 +53,21 @@ export interface TestStatistics {
   id: number;
   test_id: number;
   total_attempts: number;
-  total_correct: number;
-  total_incorrect: number;
-  total_skipped: number;
-  last_attempt_at: string | null;
+  total_correct_answers: number;
+  total_questions_answered: number;
+  average_score: number;
+  best_score: number;
+  last_attempt_date: string | null;
+  total_dont_know: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SessionAnswer {
-  id: number;
   test_id: number;
-  question_id: number;
-  selected_options: string;
-  is_correct: boolean | null;
-  status: 'answered' | 'skipped' | 'dont_know';
-  answered_at: string;
+  question_index: number;
+  answer_json: string | null;
+  is_answered: boolean;
 }
 
 export type QuestionWithOptions = Question & {

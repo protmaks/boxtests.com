@@ -7,6 +7,7 @@ import { QuestionCard } from '../components/QuestionCard';
 import { OptionList } from '../components/OptionList';
 import { ProgressBar } from '../components/ProgressBar';
 import { InstantStats } from '../components/InstantStats';
+import { QuestionNav } from '../components/QuestionNav';
 import { ExplanationBox } from '../components/ExplanationBox';
 import {
   isMultipleChoice,
@@ -14,7 +15,12 @@ import {
   evaluateSingleChoice,
   evaluateMultipleChoice,
 } from '../quiz/evaluate';
-import type { TestWithQuestions, SessionAnswer } from '../types/quiz';
+import type { TestWithQuestions } from '../types/quiz';
+
+interface AnswerState {
+  selectedOptions: string[];
+  isCorrect: boolean | null;
+}
 
 export default function TestInstantPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +33,7 @@ export default function TestInstantPage() {
   const [isDontKnow, setIsDontKnow] = useState(false);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [sessionAnswers, setSessionAnswers] = useState<Map<number, SessionAnswer>>(new Map());
+  const [answerStates, setAnswerStates] = useState<Map<number, AnswerState>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,12 +46,31 @@ export default function TestInstantPage() {
         setTest(testData);
 
         const answers = await getSessionAnswers(query, parseInt(id!));
-        const answersMap = new Map(answers.map((a) => [a.question_id, a]));
-        setSessionAnswers(answersMap);
+        const statesMap = new Map<number, AnswerState>();
+        
+        for (const answer of answers) {
+          const question = testData.questions[answer.question_index];
+          if (!question) continue;
+          
+          const selected = answer.answer_json ? JSON.parse(answer.answer_json) as string[] : [];
+          const correctOpts = getCorrectOptions(question.options);
+          const isMulti = isMultipleChoice(question.options);
+          
+          let correct: boolean | null = null;
+          if (selected.length > 0) {
+            correct = isMulti
+              ? evaluateMultipleChoice(selected, correctOpts)
+              : evaluateSingleChoice(selected[0], correctOpts[0]);
+          }
+          
+          statesMap.set(answer.question_index, { selectedOptions: selected, isCorrect: correct });
+        }
+        
+        setAnswerStates(statesMap);
 
         // Find first unanswered question
         const firstUnanswered = testData.questions.findIndex(
-          (q) => !answersMap.has(q.id)
+          (_, idx) => !statesMap.has(idx)
         );
         if (firstUnanswered >= 0) {
           setCurrentIndex(firstUnanswered);
@@ -64,28 +89,28 @@ export default function TestInstantPage() {
   const isMultiple = currentQuestion ? isMultipleChoice(currentQuestion.options) : false;
 
   const stats = {
-    correct: Array.from(sessionAnswers.values()).filter((a) => a.is_correct === true).length,
-    incorrect: Array.from(sessionAnswers.values()).filter((a) => a.is_correct === false).length,
-    dontKnow: Array.from(sessionAnswers.values()).filter((a) => a.status === 'dont_know').length,
-    unanswered: test ? test.questions.length - sessionAnswers.size : 0,
+    correct: Array.from(answerStates.values()).filter((a) => a.isCorrect === true).length,
+    incorrect: Array.from(answerStates.values()).filter((a) => a.isCorrect === false).length,
+    dontKnow: Array.from(answerStates.values()).filter((a) => a.selectedOptions.length === 0).length,
+    unanswered: test ? test.questions.length - answerStates.size : 0,
   };
 
   // Check if current question was already answered
   useEffect(() => {
     if (!currentQuestion) return;
-    const existingAnswer = sessionAnswers.get(currentQuestion.id);
+    const existingAnswer = answerStates.get(currentIndex);
     if (existingAnswer) {
       setIsAnswered(true);
-      setIsCorrect(existingAnswer.is_correct);
-      setSelectedOptions(JSON.parse(existingAnswer.selected_options));
-      setIsDontKnow(existingAnswer.status === 'dont_know');
+      setIsCorrect(existingAnswer.isCorrect);
+      setSelectedOptions(existingAnswer.selectedOptions);
+      setIsDontKnow(existingAnswer.selectedOptions.length === 0);
     } else {
       setIsAnswered(false);
       setIsCorrect(null);
       setSelectedOptions([]);
       setIsDontKnow(false);
     }
-  }, [currentIndex, currentQuestion, sessionAnswers]);
+  }, [currentIndex, currentQuestion, answerStates]);
 
   const handleSelect = (optionLetter: string) => {
     if (isAnswered) return;
@@ -112,10 +137,8 @@ export default function TestInstantPage() {
 
     const correctOptions = getCorrectOptions(currentQuestion.options);
     let correct: boolean | null = null;
-    let status: 'answered' | 'dont_know' = 'answered';
 
     if (isDontKnow) {
-      status = 'dont_know';
       correct = null;
     } else if (selectedOptions.length > 0) {
       correct = isMultiple
@@ -123,22 +146,17 @@ export default function TestInstantPage() {
         : evaluateSingleChoice(selectedOptions[0], correctOptions[0]);
     }
 
-    await saveSessionAnswer(run, parseInt(id), currentQuestion.id, selectedOptions, correct, status);
+    await saveSessionAnswer(run, parseInt(id), currentIndex, selectedOptions);
 
     setIsAnswered(true);
     setIsCorrect(correct);
 
     // Update local state
-    setSessionAnswers((prev) => {
+    setAnswerStates((prev) => {
       const newMap = new Map(prev);
-      newMap.set(currentQuestion.id, {
-        id: 0,
-        test_id: parseInt(id),
-        question_id: currentQuestion.id,
-        selected_options: JSON.stringify(selectedOptions),
-        is_correct: correct,
-        status,
-        answered_at: new Date().toISOString(),
+      newMap.set(currentIndex, {
+        selectedOptions,
+        isCorrect: correct,
       });
       return newMap;
     });
@@ -171,9 +189,9 @@ export default function TestInstantPage() {
   if (!test || !currentQuestion) {
     return (
       <div className="p-6 text-center">
-        <p className="text-red-500">Тест не найден или не содержит вопросов</p>
+        <p className="text-red-500">Test not found or has no questions</p>
         <Link to="/tests" className="text-indigo-600 hover:underline">
-          Вернуться к списку
+          Back to list
         </Link>
       </div>
     );
@@ -181,16 +199,24 @@ export default function TestInstantPage() {
 
   const canSubmit = !isAnswered && (selectedOptions.length > 0 || isDontKnow);
   const isLast = currentIndex === test.questions.length - 1;
-  const allAnswered = sessionAnswers.size === test.questions.length;
+  const allAnswered = answerStates.size === test.questions.length;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-4">
-        <h1 className="text-xl font-bold mb-2">{test.display_name}</h1>
-        <ProgressBar current={sessionAnswers.size} total={test.questions.length} />
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-xl font-bold">{test.display_name}</h1>
+          <InstantStats {...stats} />
+        </div>
+        <ProgressBar current={answerStates.size} total={test.questions.length} />
       </div>
 
-      <InstantStats {...stats} />
+      <QuestionNav
+        total={test.questions.length}
+        currentIndex={currentIndex}
+        answerStates={answerStates}
+        onSelect={setCurrentIndex}
+      />
 
       <div className="mt-6">
         <QuestionCard
@@ -221,10 +247,10 @@ export default function TestInstantPage() {
               }`}
             >
               {isCorrect === true
-                ? '✓ Правильно!'
+                ? '✓ Correct!'
                 : isCorrect === false
-                ? '✗ Неправильно'
-                : '? Не знаю'}
+                ? '✗ Incorrect'
+                : '? Don\'t know'}
             </div>
           )}
 
@@ -238,7 +264,7 @@ export default function TestInstantPage() {
           disabled={currentIndex === 0}
           className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg disabled:opacity-50"
         >
-          ← Назад
+          ← Back
         </button>
 
         <div className="flex gap-2">
@@ -248,7 +274,7 @@ export default function TestInstantPage() {
               disabled={!canSubmit}
               className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
             >
-              Проверить
+              Check
             </button>
           )}
 
@@ -257,7 +283,7 @@ export default function TestInstantPage() {
               onClick={handleNext}
               className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
             >
-              Далее →
+              Next →
             </button>
           )}
 
@@ -266,7 +292,7 @@ export default function TestInstantPage() {
               onClick={handleFinish}
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
-              Завершить
+              Finish
             </button>
           )}
         </div>
@@ -276,13 +302,13 @@ export default function TestInstantPage() {
           disabled={isLast}
           className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg disabled:opacity-50"
         >
-          Далее →
+          Next →
         </button>
       </div>
 
       <div className="mt-4 text-center">
         <Link to={`/test/${id}/mode`} className="text-indigo-600 hover:underline text-sm">
-          Выбрать другой режим
+          Choose another mode
         </Link>
       </div>
     </div>

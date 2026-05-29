@@ -18,3 +18,10 @@ body {
 #root {
   min-height: 100vh;
 }
+
+pre {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg p-4 my-4 overflow-x-auto;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}

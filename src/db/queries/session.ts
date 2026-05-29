@@ -6,23 +6,17 @@ type RunFn = (sql: string) => Promise<void>;
 export async function saveSessionAnswer(
   run: RunFn,
   testId: number,
-  questionId: number,
-  selectedOptions: string[],
-  isCorrect: boolean | null,
-  status: 'answered' | 'skipped' | 'dont_know'
+  questionIndex: number,
+  selectedOptions: string[]
 ): Promise<void> {
-  const optionsJson = JSON.stringify(selectedOptions);
-  const correctVal = isCorrect === null ? 'NULL' : isCorrect ? 'TRUE' : 'FALSE';
-
-  // Delete existing answer first
-  await run(`
-    DELETE FROM session_answers 
-    WHERE test_id = ${testId} AND question_id = ${questionId}
-  `);
+  const answerJson = JSON.stringify(selectedOptions);
 
   await run(`
-    INSERT INTO session_answers (test_id, question_id, selected_options, is_correct, status)
-    VALUES (${testId}, ${questionId}, '${optionsJson}', ${correctVal}, '${status}')
+    INSERT INTO test_current_session (test_id, question_index, answer_json, is_answered)
+    VALUES (${testId}, ${questionIndex}, '${answerJson}', TRUE)
+    ON CONFLICT (test_id, question_index) DO UPDATE SET
+      answer_json = '${answerJson}',
+      is_answered = TRUE
   `);
 }
 
@@ -31,44 +25,23 @@ export async function getSessionAnswers(
   testId: number
 ): Promise<SessionAnswer[]> {
   return query<SessionAnswer>(`
-    SELECT id, test_id, question_id, selected_options, is_correct, status, answered_at
-    FROM session_answers
+    SELECT test_id, question_index, answer_json, is_answered
+    FROM test_current_session
     WHERE test_id = ${testId}
-    ORDER BY question_id
+    ORDER BY question_index
   `);
 }
 
 export async function clearSession(run: RunFn, testId: number): Promise<void> {
-  await run(`DELETE FROM session_answers WHERE test_id = ${testId}`);
-}
-
-export async function resetMistakesOnly(run: RunFn, testId: number): Promise<void> {
-  await run(`
-    DELETE FROM session_answers 
-    WHERE test_id = ${testId} 
-    AND (is_correct = FALSE OR status = 'dont_know')
-  `);
+  await run(`DELETE FROM test_current_session WHERE test_id = ${testId}`);
 }
 
 export async function getSessionProgress(
   query: QueryFn,
   testId: number
-): Promise<{
-  total: number;
-  answered: number;
-  correct: number;
-  incorrect: number;
-  skipped: number;
-  dontKnow: number;
-}> {
+): Promise<{ answered: number }> {
   const answers = await getSessionAnswers(query, testId);
-
   return {
-    total: answers.length,
-    answered: answers.filter((a) => a.status === 'answered').length,
-    correct: answers.filter((a) => a.is_correct === true).length,
-    incorrect: answers.filter((a) => a.is_correct === false).length,
-    skipped: answers.filter((a) => a.status === 'skipped').length,
-    dontKnow: answers.filter((a) => a.status === 'dont_know').length,
+    answered: answers.filter((a) => a.is_answered).length,
   };
 }

@@ -25,13 +25,14 @@ export function OptionList({
 }: OptionListProps) {
   const getOptionClass = (option: QuestionOption) => {
     const isSelected = selectedOptions.includes(option.option_letter);
+    const isCorrect = option.is_correct === true || option.is_correct === 'true';
     let baseClass =
       'w-full text-left p-4 rounded-lg border-2 transition-all flex items-start gap-3';
 
     if (disabled && showCorrect) {
-      if (option.is_correct) {
+      if (isCorrect) {
         baseClass += ' border-green-500 bg-green-50 dark:bg-green-900/20';
-      } else if (isSelected && !option.is_correct) {
+      } else if (isSelected && !isCorrect) {
         baseClass += ' border-red-500 bg-red-50 dark:bg-red-900/20';
       } else {
         baseClass += ' border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800';
@@ -89,8 +90,8 @@ export function OptionList({
             className="flex-1 text-gray-900 dark:text-gray-100"
             dangerouslySetInnerHTML={{ __html: option.option_text }}
           />
-          {showCorrect && option.is_correct && (
-            <span className="text-green-600 dark:text-green-400 text-sm">✓ Правильный</span>
+          {showCorrect && (option.is_correct === true || option.is_correct === 'true') && (
+            <span className="text-green-600 dark:text-green-400 text-sm">✓ Correct</span>
           )}
         </button>
       ))}
@@ -109,7 +110,7 @@ export function OptionList({
           <span className="w-6 h-6 rounded-full border-2 border-yellow-500 flex items-center justify-center flex-shrink-0">
             ?
           </span>
-          <span className="text-gray-600 dark:text-gray-400">Не знаю</span>
+          <span className="text-gray-600 dark:text-gray-400">Don't know</span>
         </button>
       )}
     </div>

@@ -8,7 +8,7 @@ export function useBeforeUnload() {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = 'У вас есть несохранённые изменения. Вы уверены, что хотите покинуть страницу?';
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
         return e.returnValue;
       }
     };

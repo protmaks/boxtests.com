@@ -42,7 +42,7 @@ export default function ManageGroupsPage() {
   };
 
   const handleDeleteGroup = async (id: number) => {
-    if (!confirm('Удалить группу? Тесты в ней останутся без группы.')) return;
+    if (!confirm('Delete group? Tests in it will become ungrouped.')) return;
     await deleteGroup(run, id);
     await loadData();
   };
@@ -56,7 +56,7 @@ export default function ManageGroupsPage() {
   };
 
   const handleDeleteSubgroup = async (id: number) => {
-    if (!confirm('Удалить подгруппу?')) return;
+    if (!confirm('Delete subgroup?')) return;
     await deleteSubgroup(run, id);
     await loadData();
   };
@@ -72,20 +72,20 @@ export default function ManageGroupsPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Управление группами</h1>
+        <h1 className="text-2xl font-bold">Manage Groups</h1>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Groups */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Группы ({groups.length})</h2>
+          <h2 className="text-lg font-semibold mb-4">Groups ({groups.length})</h2>
           
           <form onSubmit={handleAddGroup} className="flex gap-2 mb-4">
             <input
               type="text"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="Название группы"
+              placeholder="Group name"
               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
             />
             <input
@@ -104,7 +104,7 @@ export default function ManageGroupsPage() {
 
           <div className="space-y-2">
             {groups.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Нет групп</p>
+              <p className="text-gray-500 text-center py-4">No groups</p>
             ) : (
               groups.map((g) => (
                 <div
@@ -132,7 +132,7 @@ export default function ManageGroupsPage() {
 
         {/* Subgroups */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Подгруппы ({subgroups.length})</h2>
+          <h2 className="text-lg font-semibold mb-4">Subgroups ({subgroups.length})</h2>
           
           <form onSubmit={handleAddSubgroup} className="flex gap-2 mb-4">
             <select
@@ -140,7 +140,7 @@ export default function ManageGroupsPage() {
               onChange={(e) => setNewSubgroupGroupId(e.target.value ? parseInt(e.target.value) : null)}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
             >
-              <option value="">Группа</option>
+              <option value="">Group</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
@@ -149,7 +149,7 @@ export default function ManageGroupsPage() {
               type="text"
               value={newSubgroupName}
               onChange={(e) => setNewSubgroupName(e.target.value)}
-              placeholder="Название подгруппы"
+              placeholder="Subgroup name"
               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
             />
             <button
@@ -163,7 +163,7 @@ export default function ManageGroupsPage() {
 
           <div className="space-y-2">
             {subgroups.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Нет подгрупп</p>
+              <p className="text-gray-500 text-center py-4">No subgroups</p>
             ) : (
               subgroups.map((s) => {
                 const group = groups.find((g) => g.id === s.group_id);
@@ -198,7 +198,7 @@ export default function ManageGroupsPage() {
 
       <div className="mt-6">
         <Link to="/tests" className="text-indigo-600 hover:underline">
-          ← Вернуться к тестам
+          ← Back to Tests
         </Link>
       </div>
     </div>

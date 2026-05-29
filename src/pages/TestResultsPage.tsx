@@ -4,14 +4,26 @@ import { useDB } from '../hooks/useDB';
 import { getTestWithQuestions } from '../db/queries/tests';
 import { getSessionAnswers, clearSession } from '../db/queries/session';
 import { updateStatistics } from '../db/queries/statistics';
-import { calculateScore, getCorrectOptions } from '../quiz/evaluate';
-import type { TestWithQuestions, SessionAnswer } from '../types/quiz';
+import {
+  calculateScore,
+  getCorrectOptions,
+  isMultipleChoice,
+  evaluateSingleChoice,
+  evaluateMultipleChoice,
+} from '../quiz/evaluate';
+import type { TestWithQuestions } from '../types/quiz';
+
+interface ResultItem {
+  question: TestWithQuestions['questions'][0];
+  isCorrect: boolean | null;
+  selectedOptions: string[];
+}
 
 export default function TestResultsPage() {
   const { id } = useParams<{ id: string }>();
   const { query, run, isInitialized } = useDB();
   const [test, setTest] = useState<TestWithQuestions | null>(null);
-  const [answers, setAnswers] = useState<SessionAnswer[]>([]);
+  const [results, setResults] = useState<ResultItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,14 +36,38 @@ export default function TestResultsPage() {
           getSessionAnswers(query, parseInt(id!)),
         ]);
         setTest(testData);
-        setAnswers(sessionAnswers);
+
+        if (!testData) return;
+
+        // Compute results from answers
+        const answersMap = new Map(sessionAnswers.map((a) => [a.question_index, a]));
+        const computedResults = testData.questions.map((q, idx) => {
+          const answer = answersMap.get(idx);
+          const selected = answer?.answer_json ? JSON.parse(answer.answer_json) as string[] : [];
+          const correctOpts = getCorrectOptions(q.options);
+          const isMulti = isMultipleChoice(q.options);
+
+          let correct: boolean | null = null;
+          if (selected.length > 0) {
+            correct = isMulti
+              ? evaluateMultipleChoice(selected, correctOpts)
+              : evaluateSingleChoice(selected[0], correctOpts[0]);
+          }
+
+          return {
+            question: q,
+            isCorrect: correct,
+            selectedOptions: selected,
+          };
+        });
+        setResults(computedResults);
 
         // Update statistics
-        if (testData && sessionAnswers.length > 0) {
-          const correct = sessionAnswers.filter((a) => a.is_correct === true).length;
-          const incorrect = sessionAnswers.filter((a) => a.is_correct === false).length;
-          const skipped = sessionAnswers.filter((a) => a.status === 'dont_know').length;
-          await updateStatistics(run, query, parseInt(id!), correct, incorrect, skipped);
+        if (sessionAnswers.length > 0) {
+          const correctCount = computedResults.filter((r) => r.isCorrect === true).length;
+          const totalAnswered = computedResults.filter((r) => r.selectedOptions.length > 0).length;
+          const dontKnow = computedResults.filter((r) => r.selectedOptions.length === 0).length;
+          await updateStatistics(run, query, parseInt(id!), correctCount, totalAnswered, dontKnow);
         }
       } catch (err) {
         console.error('Failed to load results:', err);
@@ -46,7 +82,7 @@ export default function TestResultsPage() {
   const handleReset = async () => {
     if (!id) return;
     await clearSession(run, parseInt(id));
-    setAnswers([]);
+    setResults([]);
   };
 
   if (loading) {
@@ -60,33 +96,22 @@ export default function TestResultsPage() {
   if (!test) {
     return (
       <div className="p-6 text-center">
-        <p className="text-red-500">Тест не найден</p>
+        <p className="text-red-500">Test not found</p>
         <Link to="/tests" className="text-indigo-600 hover:underline">
-          Вернуться к списку
+          Back to list
         </Link>
       </div>
     );
   }
 
-  const answersMap = new Map(answers.map((a) => [a.question_id, a]));
-  const results = test.questions.map((q) => {
-    const answer = answersMap.get(q.id);
-    return {
-      question: q,
-      isCorrect: answer?.is_correct ?? null,
-      status: answer?.status ?? 'skipped',
-      selectedOptions: answer ? JSON.parse(answer.selected_options) as string[] : [],
-    };
-  });
-
   const score = calculateScore(
-    results.map((r) => ({ isCorrect: r.isCorrect, status: r.status }))
+    results.map((r) => ({ isCorrect: r.isCorrect, status: r.selectedOptions.length > 0 ? 'answered' : 'skipped' }))
   );
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-2 text-center">{test.display_name}</h1>
-      <p className="text-gray-500 text-center mb-6">Результаты</p>
+      <p className="text-gray-500 text-center mb-6">Results</p>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center mb-6">
         <div
@@ -103,19 +128,19 @@ export default function TestResultsPage() {
         <div className="grid grid-cols-4 gap-4 text-sm">
           <div>
             <div className="font-bold text-green-600">{score.correct}</div>
-            <div className="text-gray-500">Правильно</div>
+            <div className="text-gray-500">Correct</div>
           </div>
           <div>
             <div className="font-bold text-red-600">{score.incorrect}</div>
-            <div className="text-gray-500">Неправильно</div>
+            <div className="text-gray-500">Incorrect</div>
           </div>
           <div>
             <div className="font-bold text-yellow-600">{score.dontKnow}</div>
-            <div className="text-gray-500">Не знаю</div>
+            <div className="text-gray-500">Don't know</div>
           </div>
           <div>
             <div className="font-bold text-gray-500">{score.skipped}</div>
-            <div className="text-gray-500">Пропущено</div>
+            <div className="text-gray-500">Skipped</div>
           </div>
         </div>
       </div>
@@ -125,17 +150,17 @@ export default function TestResultsPage() {
           onClick={handleReset}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
-          Пройти снова
+          Take Again
         </button>
         <Link
           to="/tests"
           className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
         >
-          К списку тестов
+          Back to Tests
         </Link>
       </div>
 
-      <h2 className="text-xl font-bold mb-4">Детализация по вопросам:</h2>
+      <h2 className="text-xl font-bold mb-4">Question Details:</h2>
       <div className="space-y-4">
         {results.map((result, index) => {
           const correctOptions = getCorrectOptions(result.question.options);
@@ -168,11 +193,11 @@ export default function TestResultsPage() {
                     dangerouslySetInnerHTML={{ __html: result.question.question_text }}
                   />
                   <div className="text-sm">
-                    {result.status === 'dont_know' ? (
-                      <span className="text-yellow-600">Не знаю</span>
-                    ) : result.selectedOptions.length > 0 ? (
+                    {result.selectedOptions.length === 0 ? (
+                      <span className="text-gray-400">Skipped</span>
+                    ) : (
                       <>
-                        <span className="text-gray-500">Ваш ответ: </span>
+                        <span className="text-gray-500">Your answer: </span>
                         <span
                           className={
                             result.isCorrect ? 'text-green-600' : 'text-red-600'
@@ -181,12 +206,10 @@ export default function TestResultsPage() {
                           {result.selectedOptions.join(', ')}
                         </span>
                       </>
-                    ) : (
-                      <span className="text-gray-400">Пропущено</span>
                     )}
                     {!result.isCorrect && (
                       <span className="ml-2 text-green-600">
-                        (Правильно: {correctOptions.join(', ')})
+                        (Correct: {correctOptions.join(', ')})
                       </span>
                     )}
                   </div>

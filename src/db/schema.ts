@@ -38,16 +38,18 @@ CREATE TABLE IF NOT EXISTS tests (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Questions
+-- Questions (denormalized: each row is one option for a question)
 CREATE TABLE IF NOT EXISTS questions (
-  id INTEGER PRIMARY KEY,
-  question_text TEXT NOT NULL,
+  id INTEGER,
+  question_text TEXT,
+  id_var TEXT,
+  options TEXT,
+  correct_answer BOOLEAN DEFAULT FALSE,
   test_id INTEGER NOT NULL,
-  explanation TEXT,
-  question_group_id INTEGER
+  explanation TEXT
 );
 
--- Question options (normalized from original schema)
+-- Question options (normalized - legacy, may not exist in actual DB)
 CREATE TABLE IF NOT EXISTS question_options (
   id INTEGER PRIMARY KEY,
   question_id INTEGER NOT NULL,
@@ -62,21 +64,23 @@ CREATE TABLE IF NOT EXISTS test_statistics (
   id INTEGER PRIMARY KEY,
   test_id INTEGER NOT NULL UNIQUE,
   total_attempts INTEGER DEFAULT 0,
-  total_correct INTEGER DEFAULT 0,
-  total_incorrect INTEGER DEFAULT 0,
-  total_skipped INTEGER DEFAULT 0,
-  last_attempt_at TIMESTAMP
+  total_correct_answers INTEGER DEFAULT 0,
+  total_questions_answered INTEGER DEFAULT 0,
+  average_score FLOAT DEFAULT 0,
+  best_score FLOAT DEFAULT 0,
+  last_attempt_date TIMESTAMP,
+  total_dont_know INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Session answers (for tracking progress in instant mode)
-CREATE TABLE IF NOT EXISTS session_answers (
-  id INTEGER PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS test_current_session (
   test_id INTEGER NOT NULL,
-  question_id INTEGER NOT NULL,
-  selected_options TEXT,
-  is_correct BOOLEAN,
-  status TEXT DEFAULT 'answered',
-  answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  question_index INTEGER NOT NULL,
+  answer_json VARCHAR,
+  is_answered BOOLEAN DEFAULT FALSE,
+  PRIMARY KEY (test_id, question_index)
 );
 
 -- Media blobs (for storing images)
@@ -92,7 +96,7 @@ CREATE TABLE IF NOT EXISTS media_blobs (
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_questions_test_id ON questions(test_id);
 CREATE INDEX IF NOT EXISTS idx_question_options_question_id ON question_options(question_id);
-CREATE INDEX IF NOT EXISTS idx_session_answers_test_id ON session_answers(test_id);
+CREATE INDEX IF NOT EXISTS idx_test_current_session_test_id ON test_current_session(test_id);
 CREATE INDEX IF NOT EXISTS idx_tests_group_id ON tests(group_id);
 CREATE INDEX IF NOT EXISTS idx_test_subgroups_group_id ON test_subgroups(group_id);
 `;

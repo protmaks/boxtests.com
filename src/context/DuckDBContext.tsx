@@ -114,35 +114,53 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       const buffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(buffer);
 
+      // Flush any pending writes first
+      await db.flushFiles();
+      
+      // Close connection
       await conn.close();
+      
+      // Close the database to release WAL lock
+      await db.open({ path: ':memory:' });
+      
+      // Now drop the old files
       await db.dropFile('data.duckdb').catch(() => {});
+      await db.dropFile('data.duckdb.wal').catch(() => {});
+      
+      // Register and open new file
       await db.registerFileBuffer('data.duckdb', uint8Array);
-      await db.open({ path: 'data.duckdb' });
+      await db.open({
+        path: 'data.duckdb',
+        accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
+      });
 
       const newConn = await db.connect();
       setConn(newConn);
       setHasUnsavedChanges(false);
 
       // Save to OPFS
-      await saveToOPFS(db);
+      await saveToOPFS(db, newConn);
     },
     [db, conn]
   );
 
   const exportToBlob = useCallback(async (): Promise<Blob> => {
-    if (!db) throw new Error('Database not initialized');
+    if (!db || !conn) throw new Error('Database not initialized');
 
+    // Force checkpoint to write WAL data to main file
+    await conn.query('CHECKPOINT');
     await db.flushFiles();
+    
     const buffer = await db.copyFileToBuffer('data.duckdb');
     setHasUnsavedChanges(false);
 
-    // Save to OPFS
+    // Save to OPFS (checkpoint already done)
     await saveToOPFS(db);
 
     // Convert to ArrayBuffer for Blob compatibility
     const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
     return new Blob([arrayBuffer], { type: 'application/octet-stream' });
-  }, [db]);
+  }, [db, conn]);
 
   return (
     <DuckDBContext.Provider
@@ -200,13 +218,17 @@ async function tryLoadFromOPFS(
   }
 }
 
-async function saveToOPFS(db: duckdb.AsyncDuckDB): Promise<void> {
+async function saveToOPFS(db: duckdb.AsyncDuckDB, conn?: duckdb.AsyncDuckDBConnection | null): Promise<void> {
   if (!('storage' in navigator) || !('getDirectory' in navigator.storage)) {
     console.warn('OPFS not supported');
     return;
   }
 
   try {
+    // Force checkpoint if connection is available
+    if (conn) {
+      await conn.query('CHECKPOINT');
+    }
     await db.flushFiles();
     const buffer = await db.copyFileToBuffer('data.duckdb').catch(() => null);
     if (!buffer) return;

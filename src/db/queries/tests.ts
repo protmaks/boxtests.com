@@ -28,41 +28,48 @@ export async function getTestWithQuestions(
   const test = await getTestById(query, testId);
   if (!test) return null;
 
-  const questions = await query<{
+  // Query denormalized questions table (each row is one option)
+  const rows = await query<{
     id: number;
     question_text: string;
+    id_var: string;
+    options: string;
+    correct_answer: boolean;
     test_id: number;
     explanation: string | null;
-    question_group_id: number | null;
   }>(`
-    SELECT id, question_text, test_id, explanation, question_group_id
+    SELECT id, question_text, id_var, options, correct_answer, test_id, explanation
     FROM questions
     WHERE test_id = ${testId}
-    ORDER BY id
+    ORDER BY id, id_var
   `);
 
-  const options = await query<{
-    id: number;
-    question_id: number;
-    test_id: number;
-    option_letter: string;
-    option_text: string;
-    is_correct: boolean;
-  }>(`
-    SELECT id, question_id, test_id, option_letter, option_text, is_correct
-    FROM question_options
-    WHERE test_id = ${testId}
-    ORDER BY question_id, option_letter
-  `);
-
-  const questionsWithOptions: QuestionWithOptions[] = questions.map((q) => ({
-    ...q,
-    options: options.filter((o) => o.question_id === q.id),
-  }));
+  // Group by question id
+  const questionsMap = new Map<number, QuestionWithOptions>();
+  for (const row of rows) {
+    if (!questionsMap.has(row.id)) {
+      questionsMap.set(row.id, {
+        id: row.id,
+        question_text: row.question_text,
+        test_id: row.test_id,
+        explanation: row.explanation,
+        options: [],
+      });
+    }
+    const question = questionsMap.get(row.id)!;
+    question.options.push({
+      id: question.options.length + 1,
+      question_id: row.id,
+      test_id: row.test_id,
+      option_letter: row.id_var,
+      option_text: row.options,
+      is_correct: row.correct_answer,
+    });
+  }
 
   return {
     ...test,
-    questions: questionsWithOptions,
+    questions: Array.from(questionsMap.values()),
   };
 }
 

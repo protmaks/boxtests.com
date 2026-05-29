@@ -6,7 +6,7 @@ import { saveSessionAnswer, clearSession } from '../db/queries/session';
 import { QuestionCard } from '../components/QuestionCard';
 import { OptionList } from '../components/OptionList';
 import { ProgressBar } from '../components/ProgressBar';
-import { isMultipleChoice, getCorrectOptions, evaluateSingleChoice, evaluateMultipleChoice } from '../quiz/evaluate';
+import { isMultipleChoice } from '../quiz/evaluate';
 import type { TestWithQuestions } from '../types/quiz';
 
 type AnswerState = {
@@ -74,32 +74,18 @@ export default function TestSinglePage() {
     setSubmitting(true);
 
     try {
-      for (const question of test.questions) {
+      for (let idx = 0; idx < test.questions.length; idx++) {
+        const question = test.questions[idx];
         const answer = answers.get(question.id);
         const selectedOptions = answer?.selectedOptions || [];
-        const isDontKnow = answer?.isDontKnow || false;
-        const isMultiple = isMultipleChoice(question.options);
-        const correctOptions = getCorrectOptions(question.options);
 
-        let isCorrect: boolean | null = null;
-        let status: 'answered' | 'skipped' | 'dont_know' = 'skipped';
-
-        if (isDontKnow) {
-          status = 'dont_know';
-        } else if (selectedOptions.length > 0) {
-          status = 'answered';
-          isCorrect = isMultiple
-            ? evaluateMultipleChoice(selectedOptions, correctOptions)
-            : evaluateSingleChoice(selectedOptions[0], correctOptions[0]);
-        }
-
-        await saveSessionAnswer(run, parseInt(id), question.id, selectedOptions, isCorrect, status);
+        await saveSessionAnswer(run, parseInt(id), idx, selectedOptions);
       }
 
       navigate(`/test/${id}/results`);
     } catch (err) {
       console.error('Failed to submit test:', err);
-      alert('Ошибка при сохранении результатов');
+      alert('Error saving results');
     } finally {
       setSubmitting(false);
     }
@@ -116,9 +102,9 @@ export default function TestSinglePage() {
   if (!test || test.questions.length === 0) {
     return (
       <div className="p-6 text-center">
-        <p className="text-red-500">Тест не найден или не содержит вопросов</p>
+        <p className="text-red-500">Test not found or has no questions</p>
         <Link to="/tests" className="text-indigo-600 hover:underline">
-          Вернуться к списку
+          Back to list
         </Link>
       </div>
     );
@@ -129,7 +115,7 @@ export default function TestSinglePage() {
   ).length;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 py-4 z-10">
         <h1 className="text-xl font-bold mb-2">{test.display_name}</h1>
         <ProgressBar current={answeredCount} total={test.questions.length} />
@@ -163,14 +149,14 @@ export default function TestSinglePage() {
 
       <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-4 mt-6 flex justify-between items-center">
         <Link to={`/test/${id}/mode`} className="text-indigo-600 hover:underline">
-          ← Выбрать другой режим
+          ← Choose another mode
         </Link>
         <button
           onClick={handleSubmit}
           disabled={submitting}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
         >
-          {submitting ? 'Проверка...' : 'Завершить тест'}
+          {submitting ? 'Checking...' : 'Finish Test'}
         </button>
       </div>
     </div>

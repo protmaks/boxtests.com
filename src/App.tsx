@@ -12,26 +12,26 @@ function AppContent() {
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <nav className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold text-indigo-600">
-            PM Tester
+            BOX-tests
           </Link>
           <div className="flex gap-6 items-center">
             <Link
               to="/tests"
               className="text-gray-600 dark:text-gray-300 hover:text-indigo-600"
             >
-              Тесты
+              Tests
             </Link>
             <Link
               to="/manage/groups"
               className="text-gray-600 dark:text-gray-300 hover:text-indigo-600"
             >
-              Группы
+              Groups
             </Link>
             <Link
               to="/manage/difficulty"
               className="text-gray-600 dark:text-gray-300 hover:text-indigo-600"
             >
-              Сложность
+              Difficulty
             </Link>
             <div className="border-l border-gray-300 dark:border-gray-600 h-6 mx-2" />
             <FileActions />
@@ -45,7 +45,7 @@ function AppContent() {
         <Outlet />
       </main>
       <footer className="bg-gray-100 dark:bg-gray-800 py-4 text-center text-sm text-gray-500">
-        PM Tester © 2024 — React + DuckDB WASM
+        BOX-tests © 2024 — React + DuckDB WASM
       </footer>
     </div>
   );

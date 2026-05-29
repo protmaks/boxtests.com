@@ -48,7 +48,7 @@ export default function ManageDifficultyPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Удалить уровень сложности?')) return;
+    if (!confirm('Delete difficulty level?')) return;
     await deleteDifficultyLevel(run, id);
     await loadData();
   };
@@ -69,18 +69,18 @@ export default function ManageDifficultyPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Уровни сложности</h1>
+        <h1 className="text-2xl font-bold">Difficulty Levels</h1>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Добавить уровень</h2>
+        <h2 className="text-lg font-semibold mb-4">Add Level</h2>
         <form onSubmit={handleAdd} className="flex gap-2">
           <select
             value={newGroupId ?? ''}
             onChange={(e) => setNewGroupId(e.target.value ? parseInt(e.target.value) : null)}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
           >
-            <option value="">Выберите группу</option>
+            <option value="">Select Group</option>
             {groups.map((g) => (
               <option key={g.id} value={g.id}>{g.name}</option>
             ))}
@@ -89,7 +89,7 @@ export default function ManageDifficultyPage() {
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Название уровня"
+            placeholder="Level name"
             className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
           />
           <input
@@ -103,7 +103,7 @@ export default function ManageDifficultyPage() {
             disabled={!newGroupId || !newName.trim()}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
           >
-            Добавить
+            Add
           </button>
         </form>
       </div>
@@ -111,10 +111,10 @@ export default function ManageDifficultyPage() {
       {groups.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Сначала создайте группы тестов
+            First create test groups
           </p>
           <Link to="/manage/groups" className="text-indigo-600 hover:underline">
-            Перейти к управлению группами
+            Go to group management
           </Link>
         </div>
       ) : (
@@ -133,7 +133,7 @@ export default function ManageDifficultyPage() {
               </h3>
               {groupLevels.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">
-                  Нет уровней сложности для этой группы
+                  No difficulty levels for this group
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ export default function ManageDifficultyPage() {
 
       <div className="mt-6">
         <Link to="/tests" className="text-indigo-600 hover:underline">
-          ← Вернуться к тестам
+          ← Back to Tests
         </Link>
       </div>
     </div>

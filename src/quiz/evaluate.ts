@@ -18,11 +18,11 @@ export function evaluateMultipleChoice(
 }
 
 export function getCorrectOptions(options: QuestionOption[]): string[] {
-  return options.filter((o) => o.is_correct).map((o) => o.option_letter);
+  return options.filter((o) => o.is_correct === true || o.is_correct === 'true').map((o) => o.option_letter);
 }
 
 export function isMultipleChoice(options: QuestionOption[]): boolean {
-  return options.filter((o) => o.is_correct).length > 1;
+  return options.filter((o) => o.is_correct === true || o.is_correct === 'true').length > 1;
 }
 
 export function calculateScore(

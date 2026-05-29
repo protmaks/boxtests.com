@@ -12,7 +12,6 @@ export async function createQuestion(
   data: {
     question_text: string;
     explanation?: string | null;
-    question_group_id?: number | null;
     options: Array<{
       option_letter: string;
       option_text: string;
@@ -20,28 +19,20 @@ export async function createQuestion(
     }>;
   }
 ): Promise<number> {
-  // Get next question ID
-  const maxId = await query<{ max_id: number | null }>(`SELECT MAX(id) as max_id FROM questions`);
+  // Get next question ID for this test
+  const maxId = await query<{ max_id: number | null }>(
+    `SELECT MAX(id) as max_id FROM questions WHERE test_id = ${testId}`
+  );
   const questionId = (maxId[0]?.max_id || 0) + 1;
 
   const explanation = data.explanation ? `'${escapeSQL(data.explanation)}'` : 'NULL';
-  const groupId = data.question_group_id ?? 'NULL';
 
-  await run(`
-    INSERT INTO questions (id, question_text, test_id, explanation, question_group_id)
-    VALUES (${questionId}, '${escapeSQL(data.question_text)}', ${testId}, ${explanation}, ${groupId})
-  `);
-
-  // Insert options
-  const maxOptionId = await query<{ max_id: number | null }>(`SELECT MAX(id) as max_id FROM question_options`);
-  let optionId = (maxOptionId[0]?.max_id || 0) + 1;
-
+  // Insert each option as a separate row (denormalized format)
   for (const option of data.options) {
     await run(`
-      INSERT INTO question_options (id, question_id, test_id, option_letter, option_text, is_correct)
-      VALUES (${optionId}, ${questionId}, ${testId}, '${escapeSQL(option.option_letter)}', '${escapeSQL(option.option_text)}', ${option.is_correct})
+      INSERT INTO questions (id, question_text, id_var, options, correct_answer, test_id, explanation)
+      VALUES (${questionId}, '${escapeSQL(data.question_text)}', '${escapeSQL(option.option_letter)}', '${escapeSQL(option.option_text)}', ${option.is_correct}, ${testId}, ${explanation})
     `);
-    optionId++;
   }
 
   return questionId;
@@ -49,11 +40,11 @@ export async function createQuestion(
 
 export async function updateQuestion(
   run: RunFn,
+  testId: number,
   questionId: number,
   data: {
     question_text?: string;
     explanation?: string | null;
-    question_group_id?: number | null;
   }
 ): Promise<void> {
   const updates: string[] = [];
@@ -64,22 +55,21 @@ export async function updateQuestion(
   if (data.explanation !== undefined) {
     updates.push(`explanation = ${data.explanation ? `'${escapeSQL(data.explanation)}'` : 'NULL'}`);
   }
-  if (data.question_group_id !== undefined) {
-    updates.push(`question_group_id = ${data.question_group_id ?? 'NULL'}`);
-  }
 
   if (updates.length > 0) {
-    await run(`UPDATE questions SET ${updates.join(', ')} WHERE id = ${questionId}`);
+    await run(`UPDATE questions SET ${updates.join(', ')} WHERE id = ${questionId} AND test_id = ${testId}`);
   }
 }
 
-export async function deleteQuestion(run: RunFn, questionId: number): Promise<void> {
-  await run(`DELETE FROM questions WHERE id = ${questionId}`);
+export async function deleteQuestion(run: RunFn, testId: number, questionId: number): Promise<void> {
+  await run(`DELETE FROM questions WHERE id = ${questionId} AND test_id = ${testId}`);
 }
 
 export async function updateOption(
   run: RunFn,
-  optionId: number,
+  testId: number,
+  questionId: number,
+  optionLetter: string,
   data: {
     option_text?: string;
     is_correct?: boolean;
@@ -88,17 +78,17 @@ export async function updateOption(
   const updates: string[] = [];
 
   if (data.option_text !== undefined) {
-    updates.push(`option_text = '${escapeSQL(data.option_text)}'`);
+    updates.push(`options = '${escapeSQL(data.option_text)}'`);
   }
   if (data.is_correct !== undefined) {
-    updates.push(`is_correct = ${data.is_correct}`);
+    updates.push(`correct_answer = ${data.is_correct}`);
   }
 
   if (updates.length > 0) {
-    await run(`UPDATE question_options SET ${updates.join(', ')} WHERE id = ${optionId}`);
+    await run(`UPDATE questions SET ${updates.join(', ')} WHERE id = ${questionId} AND test_id = ${testId} AND id_var = '${escapeSQL(optionLetter)}'`);
   }
 }
 
-export async function deleteOption(run: RunFn, optionId: number): Promise<void> {
-  await run(`DELETE FROM question_options WHERE id = ${optionId}`);
+export async function deleteOption(run: RunFn, testId: number, questionId: number, optionLetter: string): Promise<void> {
+  await run(`DELETE FROM questions WHERE id = ${questionId} AND test_id = ${testId} AND id_var = '${escapeSQL(optionLetter)}'`);
 }

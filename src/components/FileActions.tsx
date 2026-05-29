@@ -18,7 +18,7 @@ export function FileActions({ onImportSuccess }: FileActionsProps) {
       onImportSuccess?.();
     } catch (err) {
       console.error('Import failed:', err);
-      alert('Не удалось импортировать файл');
+      alert('Failed to import file');
     }
 
     if (fileInputRef.current) {
@@ -39,7 +39,7 @@ export function FileActions({ onImportSuccess }: FileActionsProps) {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Не удалось экспортировать файл');
+      alert('Failed to export file');
     }
   };
 
@@ -57,14 +57,14 @@ export function FileActions({ onImportSuccess }: FileActionsProps) {
         htmlFor="db-file-input"
         className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
       >
-        📂 Открыть .duckdb
+        📂 Open .duckdb
       </label>
       <button
         onClick={handleExport}
         disabled={isLoading}
         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
       >
-        💾 Сохранить
+        💾 Save
         {hasUnsavedChanges && <span className="ml-1 text-yellow-300">*</span>}
       </button>
     </div>
