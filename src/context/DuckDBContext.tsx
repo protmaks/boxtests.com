@@ -48,7 +48,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
         );
 
         const worker = new Worker(worker_url);
-        const logger = new duckdb.ConsoleLogger();
+        const logger = new duckdb.VoidLogger();
         const database = new duckdb.AsyncDuckDB(logger, worker);
         await database.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
