@@ -205,7 +205,7 @@ export default function TestInstantPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-xl font-bold">{test.display_name}</h1>
+          <h1 className="text-xl font-bold text-white">{test.display_name}</h1>
           <InstantStats {...stats} />
         </div>
         <ProgressBar current={answerStates.size} total={test.questions.length} />

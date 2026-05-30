@@ -1,11 +1,12 @@
-import { useRef } from 'react';
+import { useRef, ReactNode } from 'react';
 import { useDuckDB } from '../context/DuckDBContext';
 
 interface FileActionsProps {
   onImportSuccess?: () => void;
+  children?: ReactNode;
 }
 
-export function FileActions({ onImportSuccess }: FileActionsProps) {
+export function FileActions({ onImportSuccess, children }: FileActionsProps) {
   const { importFromFile, exportToBlob, isLoading, hasUnsavedChanges } = useDuckDB();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,17 +56,17 @@ export function FileActions({ onImportSuccess }: FileActionsProps) {
       />
       <label
         htmlFor="db-file-input"
-        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        className="px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all font-medium"
       >
-        📂 Open .duckdb
+        Open
       </label>
+      {children}
       <button
         onClick={handleExport}
         disabled={isLoading}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+        className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-all font-medium"
       >
-        💾 Save
-        {hasUnsavedChanges && <span className="ml-1 text-yellow-300">*</span>}
+        Save
       </button>
     </div>
   );

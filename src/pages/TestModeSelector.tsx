@@ -62,7 +62,7 @@ export default function TestModeSelector() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">{test.display_name}</h1>
+      <h1 className="text-2xl font-bold mb-2 text-white">{test.display_name}</h1>
       {test.description && (
         <p className="text-gray-600 dark:text-gray-400 mb-6">{test.description}</p>
       )}
@@ -83,13 +83,13 @@ export default function TestModeSelector() {
         </div>
       )}
 
-      <h2 className="text-lg font-semibold mb-4">Choose Mode:</h2>
+      <h2 className="text-lg font-semibold mb-4 text-white">Choose Mode:</h2>
       <div className="grid gap-4">
         <Link
           to={`/test/${id}`}
           className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow"
         >
-          <h3 className="text-xl font-semibold mb-2">📄 Single Page Mode</h3>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">📄 Single Page Mode</h3>
           <p className="text-gray-600 dark:text-gray-400">
             All questions on one page. Results after submitting all answers.
           </p>
@@ -98,7 +98,7 @@ export default function TestModeSelector() {
           to={`/test/${id}/instant`}
           className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow"
         >
-          <h3 className="text-xl font-semibold mb-2">⚡ Instant Mode</h3>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">⚡ Instant Mode</h3>
           <p className="text-gray-600 dark:text-gray-400">
             One question at a time. Immediate feedback after each answer.
             {hasProgress && ' Continue where you left off.'}
@@ -106,7 +106,7 @@ export default function TestModeSelector() {
         </Link>
       </div>
       <div className="mt-6 text-center">
-        <Link to="/tests" className="text-indigo-600 hover:underline">
+        <Link to="/tests" className="text-blue-400 hover:text-blue-300 hover:underline">
           ← Back to list
         </Link>
       </div>

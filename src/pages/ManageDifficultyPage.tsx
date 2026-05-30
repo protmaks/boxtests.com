@@ -69,11 +69,11 @@ export default function ManageDifficultyPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Difficulty Levels</h1>
+        <h1 className="text-2xl font-bold text-white">Difficulty Levels</h1>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Add Level</h2>
+        <h2 className="text-lg font-semibold mb-4 text-white">Add Level</h2>
         <form onSubmit={handleAdd} className="flex gap-2">
           <select
             value={newGroupId ?? ''}
@@ -122,8 +122,7 @@ export default function ManageDifficultyPage() {
           {groupedLevels.map(({ group, levels: groupLevels }) => (
             <div key={group.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h3
-                className="text-lg font-semibold mb-4 flex items-center gap-2"
-                style={{ color: group.color }}
+                className="text-lg font-semibold mb-4 flex items-center gap-2 text-white"
               >
                 <span
                   className="w-3 h-3 rounded-full"
@@ -163,7 +162,7 @@ export default function ManageDifficultyPage() {
       )}
 
       <div className="mt-6">
-        <Link to="/tests" className="text-indigo-600 hover:underline">
+        <Link to="/tests" className="text-blue-400 hover:text-blue-300 hover:underline">
           ← Back to Tests
         </Link>
       </div>
