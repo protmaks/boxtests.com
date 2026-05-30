@@ -10,6 +10,13 @@ export function AnimatedBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Detect mobile devices
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const isLowPerformance = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    // Skip animations on low-performance devices
+    if (isLowPerformance) return;
+
     // Set canvas size
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -32,7 +39,8 @@ export function AnimatedBackground() {
     }
 
     const shapes: Shape[] = [];
-    const shapeCount = 15;
+    // Reduce shapes count on mobile for better performance
+    const shapeCount = isMobile ? 5 : 15;
     const colors = [
       'rgba(14, 165, 233, 0.15)',  // cyan
       'rgba(168, 85, 247, 0.15)',  // purple
@@ -88,7 +96,20 @@ export function AnimatedBackground() {
 
     // Animation loop
     let animationFrameId: number;
-    const animate = () => {
+    let lastFrameTime = 0;
+    const targetFPS = isMobile ? 30 : 60; // Lower FPS on mobile
+    const frameInterval = 1000 / targetFPS;
+    
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastFrameTime;
+      
+      // Throttle frame rate
+      if (deltaTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+      
+      lastFrameTime = currentTime - (deltaTime % frameInterval);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       shapes.forEach((shape) => {
@@ -109,7 +130,7 @@ export function AnimatedBackground() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);

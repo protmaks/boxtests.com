@@ -116,7 +116,7 @@
 **Goal**: DuckDB WASM runs in Web Worker with file import/export
 
 ### 1.1 DuckDB WASM Installation
-- [ ] Install package
+- [x] Install package
   ```bash
   npm install @duckdb/duckdb-wasm
   ```
@@ -167,20 +167,20 @@
 - [x] Indexes
 
 ### 1.5 File Import/Export
-- [ ] Create `src/db/import.ts`
-  - [ ] `importFromArrayBuffer(buffer: ArrayBuffer)`
-  - [ ] `importFromFile(file: File)`
-- [ ] Create `src/db/export.ts`
-  - [ ] `exportToArrayBuffer(): ArrayBuffer`
-  - [ ] `exportToBlob(): Blob`
-  - [ ] `downloadAsFile(filename: string)`
+- [x] Create `src/db/import.ts`
+  - [x] `importFromArrayBuffer(buffer: ArrayBuffer)`
+  - [x] `importFromFile(file: File)`
+- [x] Create `src/db/export.ts`
+  - [x] `exportToArrayBuffer(): ArrayBuffer`
+  - [x] `exportToBlob(): Blob`
+  - [x] `downloadAsFile(filename: string)`
 
 ### 1.6 OPFS Persistence
-- [ ] Create `src/db/opfs.ts`
-- [ ] Implement:
-  - [ ] `saveToOPFS(db: ArrayBuffer)`
-  - [ ] `loadFromOPFS(): ArrayBuffer | null`
-  - [ ] `hasOPFSSupport(): boolean`
+- [x] Create `src/db/opfs.ts`
+- [x] Implement:
+  - [x] `saveToOPFS(db: ArrayBuffer)`
+  - [x] `loadFromOPFS(): ArrayBuffer | null`
+  - [x] `hasOPFSSupport(): boolean`
 - [ ] Fallback to IndexedDB if OPFS unavailable
 
 ### 1.7 useDB Hook
@@ -204,10 +204,10 @@
 
 **✅ M1 Completion Criteria:**
 - [ ] DuckDB initializes in Web Worker without blocking UI
-- [ ] Can load .duckdb file via file input
-- [ ] Can execute SELECT and display results
-- [ ] Can export database back to .duckdb file
-- [ ] Data persists between reloads via OPFS
+- [x] Can load .duckdb file via file input
+- [x] Can execute SELECT and display results
+- [x] Can export database back to .duckdb file
+- [x] Data persists between reloads via OPFS
 
 ---
 
@@ -362,51 +362,51 @@
   - [ ] Question-by-question breakdown
 
 ### 3.7 TestListPage
-- [ ] Implement `src/pages/TestListPage.tsx`
-  - [ ] Load test list from DB
-  - [ ] Group by groups/subgroups
-  - [ ] Display statistics per test
-  - [ ] Filter by difficulty level
-  - [ ] Search by name
+- [x] Implement `src/pages/TestListPage.tsx`
+  - [x] Load test list from DB
+  - [x] Group by groups/subgroups
+  - [x] Display statistics per test
+  - [x] Filter by difficulty level
+  - [x] Search by name
 
 ### 3.8 TestModeSelector
-- [ ] Implement `src/pages/TestModeSelector.tsx`
-  - [ ] Mode selection: Single Page / Instant
-  - [ ] Test info
-  - [ ] Start buttons
+- [x] Implement `src/pages/TestModeSelector.tsx`
+  - [x] Mode selection: Single Page / Instant
+  - [x] Test info
+  - [x] Start buttons
 
 ### 3.9 TestSinglePage (Single Page Mode)
-- [ ] Implement `src/pages/TestSinglePage.tsx`
-  - [ ] Load all questions
-  - [ ] Display all questions on one page
-  - [ ] Collect answers
-  - [ ] Submit button
-  - [ ] Navigate to Results
+- [x] Implement `src/pages/TestSinglePage.tsx`
+  - [x] Load all questions
+  - [x] Display all questions on one page
+  - [x] Collect answers
+  - [x] Submit button
+  - [x] Navigate to Results
 
 ### 3.10 TestInstantPage (Instant Mode)
-- [ ] Implement `src/pages/TestInstantPage.tsx`
-  - [ ] One question at a time
-  - [ ] Immediate answer verification
-  - [ ] Show correct answer
-  - [ ] Show explanation (if available)
-  - [ ] Navigation: Prev / Next
-  - [ ] Progress tracking
-  - [ ] Save state to DB
+- [x] Implement `src/pages/TestInstantPage.tsx`
+  - [x] One question at a time
+  - [x] Immediate answer verification
+  - [x] Show correct answer
+  - [x] Show explanation (if available)
+  - [x] Navigation: Prev / Next
+  - [x] Progress tracking
+  - [x] Save state to DB
 
 ### 3.11 TestResultsPage
-- [ ] Implement `src/pages/TestResultsPage.tsx`
-  - [ ] Final score
-  - [ ] Question list with results
-  - [ ] Correct/incorrect answers
-  - [ ] Buttons: Try Again / Back to Tests
+- [x] Implement `src/pages/TestResultsPage.tsx`
+  - [x] Final score
+  - [x] Question list with results
+  - [x] Correct/incorrect answers
+  - [x] Buttons: Try Again / Back to Tests
 
 **✅ M3 Completion Criteria:**
-- [ ] Test list displays with grouping
-- [ ] Can select test mode (single/instant)
-- [ ] Single page mode shows all questions and results
-- [ ] Instant mode shows one question at a time with immediate feedback
-- [ ] "Don't know" works and is excluded from scoring
-- [ ] Statistics are saved and displayed
+- [x] Test list displays with grouping
+- [x] Can select test mode (single/instant)
+- [x] Single page mode shows all questions and results
+- [x] Instant mode shows one question at a time with immediate feedback
+- [x] "Don't know" works and is excluded from scoring
+- [x] Statistics are saved and displayed
 
 ---
 
@@ -447,33 +447,33 @@
   - [x] `deleteGroup(id)`
 
 ### 4.4 TestCreatePage
-- [ ] Implement `src/pages/TestCreatePage.tsx`
-  - [ ] Metadata form (name, group, difficulty)
-  - [ ] Dynamic question list
-  - [ ] Add new questions
-  - [ ] Validation before saving
-  - [ ] Save to DB
+- [x] Implement `src/pages/TestCreatePage.tsx`
+  - [x] Metadata form (name, group, difficulty)
+  - [x] Dynamic question list
+  - [x] Add new questions
+  - [x] Validation before saving
+  - [x] Save to DB
 
 ### 4.5 TestEditPage
-- [ ] Implement `src/pages/TestEditPage.tsx`
-  - [ ] Load existing test
-  - [ ] Edit metadata
-  - [ ] Edit questions
-  - [ ] Delete questions
-  - [ ] Save changes
+- [x] Implement `src/pages/TestEditPage.tsx`
+  - [x] Load existing test
+  - [x] Edit metadata
+  - [x] Edit questions
+  - [x] Delete questions
+  - [x] Save changes
 
 ### 4.6 ManageGroupsPage
-- [ ] Implement `src/pages/ManageGroupsPage.tsx`
-  - [ ] Group list
-  - [ ] Create group (name, color, description)
-  - [ ] Edit group
-  - [ ] Delete group (with dependency check)
-  - [ ] Manage subgroups
+- [x] Implement `src/pages/ManageGroupsPage.tsx`
+  - [x] Group list
+  - [x] Create group (name, color, description)
+  - [x] Edit group
+  - [x] Delete group (with dependency check)
+  - [x] Manage subgroups
 
 ### 4.7 ManageDifficultyPage
-- [ ] Implement `src/pages/ManageDifficultyPage.tsx`
-  - [ ] Difficulty levels list by group
-  - [ ] CRUD operations
+- [x] Implement `src/pages/ManageDifficultyPage.tsx`
+  - [x] Difficulty levels list by group
+  - [x] CRUD operations
 
 ### 4.8 TXT Import Parser
 - [ ] Create `src/import/parseQuestions.ts`
@@ -687,10 +687,10 @@
 | Milestone | Status | Start Date | Completion Date |
 |-----------|--------|------------|-----------------|
 | M0: Scaffolding | ✅ Completed | | |
-| M1: DuckDB WASM | 🟡 In Progress | | |
+| M1: DuckDB WASM | 🟡 In Progress (90%) | | |
 | M2: Google Drive | ⬜ Not Started | | |
-| M3: Quiz Engine | 🟡 In Progress | | |
-| M4: Test Management | 🟡 In Progress | | |
+| M3: Quiz Engine | ✅ Completed | | |
+| M4: Test Management | 🟡 In Progress (70%) | | |
 | M5: AI Explanations | ⬜ Not Started | | |
 | M6: Migration | ⬜ Not Started | | |
 | M7: Testing | ⬜ Not Started | | |
@@ -699,3 +699,62 @@
 - ⬜ Not Started
 - 🟡 In Progress  
 - ✅ Completed
+
+**Detailed Status:**
+
+### M0: Scaffolding ✅
+- Полностью завершен: React + Vite + TypeScript + Tailwind CSS
+- Все страницы созданы
+- Роутинг настроен
+- GitHub Pages deployment работает
+
+### M1: DuckDB WASM 🟡 90%
+**Выполнено:**
+- ✅ DuckDB WASM установлен и инициализирован
+- ✅ DuckDB Context Provider создан
+- ✅ Database Schema реализована
+- ✅ File Import/Export работает
+- ✅ OPFS Persistence реализовано
+- ✅ useDB Hook создан
+
+**Осталось:**
+- ⬜ Перенести инициализацию в Web Worker (optional - работает и так)
+- ⬜ Fallback на IndexedDB для браузеров без OPFS
+
+### M2: Google Drive ⬜
+Не начато
+
+### M3: Quiz Engine ✅
+**Полностью реализовано:**
+- ✅ Types & Interfaces
+- ✅ Database Queries (tests, groups, statistics, session)
+- ✅ Quiz Business Logic (evaluate, scoring)
+- ✅ Session Management
+- ✅ UI Components (QuestionCard, OptionList, ProgressBar, InstantStats, QuestionNav, ExplanationBox)
+- ✅ TestListPage с группировкой
+- ✅ TestModeSelector
+- ✅ TestSinglePage (одна страница)
+- ✅ TestInstantPage (instant mode)
+- ✅ TestResultsPage
+
+### M4: Test Management 🟡 70%
+**Выполнено:**
+- ✅ DB Mutations (tests, questions, groups)
+- ✅ TestCreatePage
+- ✅ TestEditPage
+- ✅ ManageGroupsPage
+- ✅ ManageDifficultyPage
+
+**Осталось:**
+- ⬜ Rich Text Editor (TipTap/Quill) для вопросов
+- ⬜ TXT Import Parser
+- ⬜ ImportTestPage
+
+### M5: AI Explanations ⬜
+Не начато
+
+### M6: Migration ⬜
+Не начато
+
+### M7: Testing & Polish ⬜
+Не начато
