@@ -70,18 +70,18 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
         if (loadedConn) {
           // Use connection from loaded database
           connection = loadedConn;
-          console.log('Using existing database from OPFS');
+          // console.log('Using existing database from OPFS');
         } else {
           // Create fresh file-backed database from template
           // Clean up any old/corrupted files first
           await database.dropFile('data.duckdb').catch(() => {});
           await database.dropFile('data.duckdb.wal').catch(() => {});
-          console.log('Cleaned up old database files');
+          // console.log('Cleaned up old database files');
           
           // Try to load template database
           let templateLoaded = false;
           try {
-            console.log('Fetching template database...');
+            // console.log('Fetching template database...');
             const response = await fetch('/empty_db.duckdb');
             if (!response.ok) {
               throw new Error(`Failed to fetch template: ${response.status}`);
@@ -94,7 +94,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
               throw new Error('Template database is empty');
             }
             
-            console.log(`Template database loaded: ${uint8Array.length} bytes`);
+            // console.log(`Template database loaded: ${uint8Array.length} bytes`);
             
             // Register and open template database
             await database.registerFileBuffer('data.duckdb', uint8Array);
@@ -105,7 +105,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
             
             connection = await database.connect();
             templateLoaded = true;
-            console.log('Initialized from template database');
+            // console.log('Initialized from template database');
           } catch (err) {
             console.warn('Failed to load template database, falling back to SQL schema:', err);
             templateLoaded = false;
@@ -117,21 +117,21 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
               path: 'data.duckdb',
               accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
             });
-            console.log('New file-backed database opened');
+            // console.log('New file-backed database opened');
             
             connection = await database.connect();
             await initializeSchema({ run: (sql) => connection.query(sql).then(() => {}) });
-            console.log('Schema initialized (SQL fallback)');
+            // console.log('Schema initialized (SQL fallback)');
           }
           
           // Force checkpoint to ensure data is written
           await connection.query('CHECKPOINT');
           await database.flushFiles();
-          console.log('Changes flushed to disk');
+          // console.log('Changes flushed to disk');
           
           // DON'T save to OPFS immediately - it causes corruption
           // Will be saved on first user action (auto-save effect)
-          console.log('Database ready (OPFS save deferred)');
+          // console.log('Database ready (OPFS save deferred)');
         }
 
         if (mounted) {
@@ -183,7 +183,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       try {
         await saveToOPFS(db, conn);
         setHasUnsavedChanges(false);
-        console.log('Auto-saved to OPFS');
+        // console.log('Auto-saved to OPFS');
         // Refresh cache size
         const size = await getOPFSCacheSize();
         setCacheSize(size);
@@ -202,7 +202,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       const buffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(buffer);
 
-      console.log('Importing file:', file.name, 'Size:', file.size, 'bytes');
+      // console.log('Importing file:', file.name, 'Size:', file.size, 'bytes');
 
       // Flush any pending writes first
       await db.flushFiles();
@@ -241,7 +241,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       // Verify database is valid by running a simple query
       try {
         await newConn.query('SELECT 1');
-        console.log('Database connection verified');
+        // console.log('Database connection verified');
       } catch (err) {
         console.error('Database verification failed:', err);
         await newConn.close();
@@ -257,13 +257,13 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
           await saveToOPFS(db, newConn);
           const size = await getOPFSCacheSize();
           setCacheSize(size);
-          console.log('Deferred OPFS save after import completed');
+          // console.log('Deferred OPFS save after import completed');
         } catch (err) {
           console.warn('Deferred OPFS save failed:', err);
         }
       }, 1000);
       
-      console.log('Import successful');
+      // console.log('Import successful');
     },
     [db, conn]
   );
@@ -272,13 +272,13 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
     if (!db || !conn) throw new Error('Database not initialized');
 
     try {
-      console.log('Starting database export...');
+      // console.log('Starting database export...');
       
       // Verify database has data
       try {
         const testCount = await conn.query('SELECT COUNT(*) as cnt FROM tests');
         const count = testCount.toArray()[0]?.toJSON() as { cnt: number };
-        console.log(`Database contains ${count.cnt} tests`);
+        // console.log(`Database contains ${count.cnt} tests`);
         
         if (count.cnt === 0) {
           throw new Error('Cannot save: database is empty. Create at least one test first.');
@@ -294,36 +294,36 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       // Force all pending transactions to complete
       try {
         await conn.query('COMMIT');
-        console.log('Transaction committed');
+        // console.log('Transaction committed');
       } catch (e) {
-        console.log('No active transaction to commit');
+        // console.log('No active transaction to commit');
       }
 
       // Multiple checkpoints to ensure all data is written
-      console.log('Running checkpoints...');
+      // console.log('Running checkpoints...');
       await conn.query('CHECKPOINT');
       await conn.query('CHECKPOINT');
-      console.log('Checkpoints completed');
+      // console.log('Checkpoints completed');
       
       // Flush all files
       await db.flushFiles();
-      console.log('Files flushed');
+      // console.log('Files flushed');
       
       // CRITICAL: Save to OPFS FIRST before trying to export
-      console.log('Saving to OPFS before export...');
+      // console.log('Saving to OPFS before export...');
       try {
         await saveToOPFS(db, conn);
-        console.log('Pre-export OPFS save successful');
+        // console.log('Pre-export OPFS save successful');
       } catch (err) {
         console.warn('Pre-export OPFS save failed:', err);
       }
       
       // Wait for filesystem sync
       await new Promise(resolve => setTimeout(resolve, 500));
-      console.log('Filesystem sync wait completed');
+      // console.log('Filesystem sync wait completed');
       
       // Now get the buffer from OPFS
-      console.log('Copying database from OPFS...');
+      // console.log('Copying database from OPFS...');
       let buffer: Uint8Array;
       
       try {
@@ -332,7 +332,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
           const fileHandle = await root.getFileHandle('pm_tester.duckdb', { create: false });
           const file = await fileHandle.getFile();
           buffer = new Uint8Array(await file.arrayBuffer());
-          console.log(`Database loaded from OPFS: ${buffer.length} bytes`);
+          // console.log(`Database loaded from OPFS: ${buffer.length} bytes`);
         } else {
           throw new Error('OPFS not supported');
         }
@@ -348,7 +348,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
         );
       }
       
-      console.log(`Database buffer ready: ${buffer.length} bytes`);
+      // console.log(`Database buffer ready: ${buffer.length} bytes`);
       
       if (buffer.length === 0) {
         throw new Error(
@@ -369,7 +369,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       // Save to OPFS (with proper delay for consistency)
       try {
         await saveToOPFS(db, conn);
-        console.log('Saved to OPFS after export');
+        // console.log('Saved to OPFS after export');
       } catch (err) {
         console.warn('OPFS save failed (non-critical):', err);
       }
@@ -402,7 +402,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
     if (!db || !conn) throw new Error('Database not initialized');
 
     try {
-      console.log('Clearing database...');
+      // console.log('Clearing database...');
       
       // Clear all data from tables (more reliable than dropping files)
       const tablesToClear = [
@@ -420,7 +420,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       for (const table of tablesToClear) {
         try {
           await conn.query(`DELETE FROM ${table}`);
-          console.log(`Cleared table: ${table}`);
+          // console.log(`Cleared table: ${table}`);
         } catch (err) {
           console.warn(`Failed to clear ${table}:`, err);
         }
@@ -428,20 +428,20 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       
       // Run VACUUM to reclaim space
       await conn.query('VACUUM');
-      console.log('Database vacuumed');
+      // console.log('Database vacuumed');
       
       // Force checkpoint and flush
       await conn.query('CHECKPOINT');
       await db.flushFiles();
-      console.log('Changes flushed to disk');
+      // console.log('Changes flushed to disk');
       
       // Clear OPFS cache
       await clearOPFSCache().catch((e) => console.warn('Clear OPFS:', e));
-      console.log('OPFS cache cleared');
+      // console.log('OPFS cache cleared');
       
       // Save new empty database to OPFS
       await saveToOPFS(db, conn).catch((e) => console.warn('Save to OPFS:', e));
-      console.log('New empty database saved to OPFS');
+      // console.log('New empty database saved to OPFS');
       
       // Update state
       setHasUnsavedChanges(false);
@@ -450,7 +450,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
       const size = await getOPFSCacheSize();
       setCacheSize(size);
       
-      console.log('Database cleared and reinitialized successfully');
+      // console.log('Database cleared and reinitialized successfully');
     } catch (err) {
       console.error('Failed to clear database:', err);
       throw err;
@@ -517,7 +517,7 @@ async function tryLoadFromOPFS(
 
     // Create connection to the loaded database
     const connection = await db.connect();
-    console.log('Loaded database from OPFS, size:', buffer.byteLength, 'bytes');
+    // console.log('Loaded database from OPFS, size:', buffer.byteLength, 'bytes');
     return connection;
   } catch (err) {
     console.warn('Failed to load from OPFS:', err);
@@ -537,7 +537,7 @@ async function saveToOPFS(db: duckdb.AsyncDuckDB, conn?: duckdb.AsyncDuckDBConne
   }
 
   try {
-    console.log('Saving file-backed database to OPFS...');
+    // console.log('Saving file-backed database to OPFS...');
     
     // Checkpoint and flush to ensure all data is written to data.duckdb
     await conn.query('CHECKPOINT');
@@ -560,7 +560,7 @@ async function saveToOPFS(db: duckdb.AsyncDuckDB, conn?: duckdb.AsyncDuckDBConne
     const writable = await fileHandle.createWritable();
     await writable.write(new Uint8Array(buffer).buffer.slice(0));
     await writable.close();
-    console.log(`Saved to OPFS (${buffer.length} bytes)`);
+    // console.log(`Saved to OPFS (${buffer.length} bytes)`);
   } catch (err) {
     console.error('Failed to save to OPFS:', err);
     // Don't throw - OPFS save is optional
@@ -590,7 +590,7 @@ async function clearOPFSCache(): Promise<void> {
   try {
     const root = await navigator.storage.getDirectory();
     await root.removeEntry('pm_tester.duckdb');
-    console.log('Cleared OPFS cache');
+    // console.log('Cleared OPFS cache');
   } catch (err) {
     console.warn('Failed to clear OPFS cache:', err);
   }

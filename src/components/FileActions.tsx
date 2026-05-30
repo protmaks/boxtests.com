@@ -201,7 +201,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         }
       }
       
-      console.log('Starting database export...');
+      // console.log('Starting database export...');
       const blob = await exportToBlob();
       
       // Validate blob size
@@ -209,7 +209,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         throw new Error('Failed to create database file (empty file)');
       }
       
-      console.log(`Database file created: ${Math.round(blob.size / 1024)}KB`);
+      // console.log(`Database file created: ${Math.round(blob.size / 1024)}KB`);
       
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -220,7 +220,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      console.log('Database file downloaded successfully');
+      // console.log('Database file downloaded successfully');
     } catch (err) {
       console.error('Export failed:', err);
       
