@@ -72,7 +72,7 @@ export function DBStatus() {
         <div className="flex items-center gap-2 text-xs sm:text-sm font-mono px-2 sm:px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg whitespace-nowrap">
           <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
           <span className="text-emerald-400">DuckDB Online</span>
-          {cacheSize !== null && (
+          {cacheSize !== null &&(
             <span className="text-emerald-400/70 ml-1">({formatBytes(cacheSize)})</span>
           )}
         </div>
@@ -84,7 +84,6 @@ export function DBStatus() {
           <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          Clear DB
         </button>
       </div>
     );
