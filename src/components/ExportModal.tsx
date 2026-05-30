@@ -378,7 +378,7 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-slate-300 hover:text-white transition-colors rounded-lg hover:bg-slate-700"
+              className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-600 transition-colors rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               Cancel
             </button>

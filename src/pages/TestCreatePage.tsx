@@ -161,7 +161,7 @@ export default function TestCreatePage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Create Test</h1>
+      <h1 className="text-2xl font-bold mb-6 text-white dark:text-white">Create Test</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
           <div>
@@ -242,7 +242,7 @@ export default function TestCreatePage() {
 
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Questions ({questions.length})</h2>
+            <h2 className="text-lg font-semibold text-white dark:text-white">Questions ({questions.length})</h2>
             <button
               type="button"
               onClick={addQuestion}
@@ -315,7 +315,7 @@ export default function TestCreatePage() {
           </button>
           <Link
             to="/tests"
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Cancel
           </Link>

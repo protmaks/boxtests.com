@@ -5,7 +5,7 @@ export default function TestEditPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Edit Test #{id}</h1>
+      <h1 className="text-2xl font-bold mb-6 text-white dark:text-white">Edit Test #{id}</h1>
       <form className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Test Name</label>
@@ -30,7 +30,7 @@ export default function TestEditPage() {
           </button>
           <Link
             to="/tests"
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Cancel
           </Link>
