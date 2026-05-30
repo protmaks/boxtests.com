@@ -110,7 +110,7 @@ export default function TestResultsPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2 text-center">{test.display_name}</h1>
+      <h1 className="text-2xl font-bold mb-2 text-center text-gray-900 dark:text-white">{test.display_name}</h1>
       <p className="text-gray-500 text-center mb-6">Results</p>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center mb-6">
@@ -154,13 +154,13 @@ export default function TestResultsPage() {
         </button>
         <Link
           to="/tests"
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           Back to Tests
         </Link>
       </div>
 
-      <h2 className="text-xl font-bold mb-4">Question Details:</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Question Details:</h2>
       <div className="space-y-4">
         {results.map((result, index) => {
           const correctOptions = getCorrectOptions(result.question.options);

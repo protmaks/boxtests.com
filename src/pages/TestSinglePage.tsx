@@ -116,7 +116,7 @@ export default function TestSinglePage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 py-4 z-10">
+      <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 py-4 px-6 z-10 shadow-md rounded-xl">
         <h1 className="text-xl font-bold mb-2">{test.display_name}</h1>
         <ProgressBar current={answeredCount} total={test.questions.length} />
       </div>
@@ -147,7 +147,7 @@ export default function TestSinglePage() {
         })}
       </div>
 
-      <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-4 mt-6 flex justify-between items-center">
+      <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-4 px-6 mt-6 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] rounded-xl">
         <Link to={`/test/${id}/mode`} className="text-indigo-600 hover:underline">
           ← Choose another mode
         </Link>
