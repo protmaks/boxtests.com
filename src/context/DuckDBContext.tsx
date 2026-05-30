@@ -63,12 +63,16 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const connection = await database.connect();
-
         // Try to load from OPFS first
-        const loaded = await tryLoadFromOPFS(database, connection);
-        if (!loaded) {
-          // Initialize fresh schema
+        const loadedConn = await tryLoadFromOPFS(database);
+        
+        let connection: duckdb.AsyncDuckDBConnection;
+        if (loadedConn) {
+          // Use connection from loaded database
+          connection = loadedConn;
+        } else {
+          // Create fresh connection and initialize schema
+          connection = await database.connect();
           await initializeSchema({ run: (sql) => connection.query(sql).then(() => {}) });
         }
 
@@ -233,11 +237,10 @@ export function useDuckDB(): DuckDBContextValue {
 
 // OPFS helpers
 async function tryLoadFromOPFS(
-  db: duckdb.AsyncDuckDB,
-  _conn: duckdb.AsyncDuckDBConnection
-): Promise<boolean> {
+  db: duckdb.AsyncDuckDB
+): Promise<duckdb.AsyncDuckDBConnection | null> {
   if (!('storage' in navigator) || !('getDirectory' in navigator.storage)) {
-    return false;
+    return null;
   }
 
   try {
@@ -247,7 +250,7 @@ async function tryLoadFromOPFS(
     const buffer = await file.arrayBuffer();
 
     if (buffer.byteLength === 0) {
-      return false;
+      return null;
     }
 
     // Load the database from OPFS
@@ -258,11 +261,13 @@ async function tryLoadFromOPFS(
       accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
     });
 
-    console.log('Loaded database from OPFS');
-    return true;
+    // Create connection to the loaded database
+    const connection = await db.connect();
+    console.log('Loaded database from OPFS, size:', buffer.byteLength, 'bytes');
+    return connection;
   } catch (err) {
     console.warn('Failed to load from OPFS:', err);
-    return false;
+    return null;
   }
 }
 

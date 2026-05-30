@@ -79,6 +79,22 @@
       gtag('js', new Date());
       gtag('config', 'G-8JRVMM490J');
     </script>
+    
+    <!-- GitHub Pages SPA redirect restoration -->
+    <script>
+      (function() {
+        // Check if we're being redirected from 404.html
+        var params = new URLSearchParams(window.location.search);
+        var path = params.get('p');
+        var query = params.get('q');
+        
+        if (path) {
+          // Restore the original path
+          var url = path + (query ? '?' + query : '');
+          window.history.replaceState(null, '', url);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

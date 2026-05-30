@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BOX-tests</title>
+  <script>
+    // GitHub Pages SPA redirect trick
+    // When a user navigates to a route like /tests and refreshes,
+    // GitHub Pages serves this 404.html. We redirect to index.html
+    // with the path encoded in the query string, which index.html
+    // will decode and restore the route.
+    (function() {
+      var pathname = window.location.pathname;
+      var search = window.location.search;
+      
+      // Only redirect if not already on index
+      if (pathname !== '/') {
+        // Encode the path and search as query parameters
+        var redirect = '/?p=' + encodeURIComponent(pathname) + 
+                      (search ? '&q=' + encodeURIComponent(search.slice(1)) : '');
+        window.location.replace(redirect);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div>Redirecting...</div>
+</body>
+</html>
