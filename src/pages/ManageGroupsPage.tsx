@@ -4,8 +4,11 @@ import { useDB } from '../hooks/useDB';
 import { getAllGroups, getAllSubgroups } from '../db/queries/groups';
 import { createGroup, deleteGroup, createSubgroup, deleteSubgroup } from '../db/mutations/groups';
 import type { TestGroup, TestSubgroup } from '../types/quiz';
+import { useSEO } from '../hooks/useSEO';
+import { SEO_CONFIGS } from '../utils/seo';
 
 export default function ManageGroupsPage() {
+  useSEO(SEO_CONFIGS.manageGroups);
   const { query, run, isInitialized } = useDB();
   const [groups, setGroups] = useState<TestGroup[]>([]);
   const [subgroups, setSubgroups] = useState<TestSubgroup[]>([]);

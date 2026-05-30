@@ -1,4 +1,4 @@
-import { useRef, ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { useDuckDB } from '../context/DuckDBContext';
 
 interface FileActionsProps {
@@ -7,7 +7,7 @@ interface FileActionsProps {
 }
 
 export function FileActions({ onImportSuccess, children }: FileActionsProps) {
-  const { importFromFile, exportToBlob, isLoading, hasUnsavedChanges } = useDuckDB();
+  const { importFromFile, exportToBlob, isLoading } = useDuckDB();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {

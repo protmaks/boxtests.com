@@ -4,8 +4,11 @@ import { useDB } from '../hooks/useDB';
 import { getAllGroups, getAllDifficultyLevels } from '../db/queries/groups';
 import { createDifficultyLevel, deleteDifficultyLevel } from '../db/mutations/groups';
 import type { TestGroup, DifficultyLevel } from '../types/quiz';
+import { useSEO } from '../hooks/useSEO';
+import { SEO_CONFIGS } from '../utils/seo';
 
 export default function ManageDifficultyPage() {
+  useSEO(SEO_CONFIGS.manageDifficulty);
   const { query, run, isInitialized } = useDB();
   const [groups, setGroups] = useState<TestGroup[]>([]);
   const [levels, setLevels] = useState<DifficultyLevel[]>([]);

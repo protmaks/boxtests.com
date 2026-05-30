@@ -1,0 +1,54 @@
+{
+  "name": "BOX-tests - Infrastructure for Knowledge",
+  "short_name": "BOX-tests",
+  "description": "A self-testing application built with geometric precision. Create tests, take them, and track your progress with blazing-fast local analytics.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0891b2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "My Tests",
+      "short_name": "Tests",
+      "description": "View all your tests",
+      "url": "/tests",
+      "icons": [
+        {
+          "src": "/logo.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Create Test",
+      "short_name": "Create",
+      "description": "Create a new test",
+      "url": "/create",
+      "icons": [
+        {
+          "src": "/logo.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

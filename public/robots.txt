@@ -1,0 +1,15 @@
+# BOX-tests Robots.txt
+# https://boxtests.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Disallow admin/edit pages from crawling (if any)
+# Disallow: /test/*/edit
+# Disallow: /manage/
+
+# Sitemap
+Sitemap: https://boxtests.com/sitemap.xml
+
+# Crawl-delay (optional, adjust if needed)
+# Crawl-delay: 1

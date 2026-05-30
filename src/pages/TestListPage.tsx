@@ -4,8 +4,11 @@ import { useDB } from '../hooks/useDB';
 import { getTestsGrouped } from '../db/queries/tests';
 import { getAllStatistics } from '../db/queries/statistics';
 import type { Test, TestStatistics } from '../types/quiz';
+import { useSEO } from '../hooks/useSEO';
+import { SEO_CONFIGS } from '../utils/seo';
 
 export default function TestListPage() {
+  useSEO(SEO_CONFIGS.tests);
   const { query, isLoading, isInitialized } = useDB();
   const [groups, setGroups] = useState<
     { group_id: number | null; group_name: string | null; group_color: string | null; tests: Test[] }[]

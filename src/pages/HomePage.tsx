@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
+import { SEO_CONFIGS } from '../utils/seo';
 
 export default function HomePage() {
+  useSEO(SEO_CONFIGS.home);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-12">
       {/* Geometric decoration */}

@@ -5,6 +5,8 @@ import { getAllGroups, getAllSubgroups, getAllDifficultyLevels } from '../db/que
 import { createTest } from '../db/mutations/tests';
 import { createQuestion } from '../db/mutations/questions';
 import type { TestGroup, TestSubgroup, DifficultyLevel } from '../types/quiz';
+import { useSEO } from '../hooks/useSEO';
+import { SEO_CONFIGS } from '../utils/seo';
 
 type QuestionDraft = {
   id: string;
@@ -17,6 +19,7 @@ type QuestionDraft = {
 };
 
 export default function TestCreatePage() {
+  useSEO(SEO_CONFIGS.create);
   const navigate = useNavigate();
   const { query, run, isInitialized } = useDB();
 
