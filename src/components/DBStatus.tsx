@@ -68,8 +68,8 @@ export function DBStatus() {
 
   if (isInitialized) {
     return (
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 text-sm font-mono px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-mono px-2 sm:px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg whitespace-nowrap">
           <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
           <span className="text-emerald-400">DuckDB Online</span>
           {cacheSize !== null && (
@@ -78,7 +78,7 @@ export function DBStatus() {
         </div>
         <button
           onClick={handleClearCache}
-          className="group flex items-center gap-1.5 px-3 py-1.5 text-sm font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 hover:border-rose-500/50 transition-all hover:scale-105"
+          className="group flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 hover:border-rose-500/50 transition-all hover:scale-105 whitespace-nowrap"
           title="Clear all database data (use to fix corruption errors)"
         >
           <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

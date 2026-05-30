@@ -266,7 +266,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <input
           ref={fileInputRef}
           type="file"
@@ -278,7 +278,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         />
         <label
           htmlFor="db-file-input"
-          className="px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all font-medium"
+          className="px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all font-medium text-sm sm:text-base whitespace-nowrap"
           title="Open existing database (.duckdb) or import from JSON export"
         >
           Open
@@ -287,7 +287,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         <button
           onClick={handleExport}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-all font-medium"
+          className="px-3 sm:px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-all font-medium text-sm sm:text-base whitespace-nowrap"
           title="Save entire database as .duckdb file (includes all tests, questions, and data)"
         >
           Save
@@ -295,7 +295,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         <button
           onClick={() => setShowExportModal(true)}
           disabled={isLoading}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.4)] disabled:opacity-50 transition-all font-medium"
+          className="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.4)] disabled:opacity-50 transition-all font-medium text-sm sm:text-base whitespace-nowrap"
           title="Export selected tests to JSON or TXT (portable format for sharing)"
         >
           Export
@@ -304,7 +304,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
           href="https://www.linkedin.com/in/protmaks/"
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center"
+          className="px-2 sm:px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center"
           title="LinkedIn Profile"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -313,7 +313,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         </a>
         <button
           onClick={() => setShowHelpModal(true)}
-          className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-cyan-400 dark:hover:text-cyan-400 transition-colors flex items-center"
+          className="px-2 sm:px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-cyan-400 dark:hover:text-cyan-400 transition-colors flex items-center"
           title="Help: File Import/Export Guide"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
