@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useDuckDB } from '../context/DuckDBContext';
 import { getTestsGrouped } from '../db/queries/tests';
 import type { Test } from '../types/quiz';
+
+type ExportFormat = 'json' | 'txt';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -16,6 +19,7 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
   const [selectedTests, setSelectedTests] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('json');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -77,73 +81,151 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
       setExporting(true);
       const testIds = Array.from(selectedTests).join(',');
 
-      // Get all data for selected tests
-      const tests = await query<Record<string, unknown>>(`
-        SELECT * FROM tests WHERE test_id IN (${testIds})
-      `);
-      const questions = await query<Record<string, unknown>>(`
-        SELECT * FROM questions WHERE test_id IN (${testIds})
-      `);
-
-      // Get related groups
-      const groupIds = [...new Set(tests.map((t) => t.group_id).filter(Boolean))];
-      const groups = groupIds.length > 0 
-        ? await query<Record<string, unknown>>(`SELECT * FROM test_groups WHERE id IN (${groupIds.join(',')})`)
-        : [];
-
-      // Get related subgroups
-      const subgroupIds = [...new Set(tests.map((t) => t.subgroup_id).filter(Boolean))];
-      const subgroups = subgroupIds.length > 0
-        ? await query<Record<string, unknown>>(`SELECT * FROM test_subgroups WHERE id IN (${subgroupIds.join(',')})`)
-        : [];
-
-      // Get related difficulty levels
-      const difficultyIds = [...new Set(tests.map((t) => t.difficulty_level_id).filter(Boolean))];
-      const difficulties = difficultyIds.length > 0
-        ? await query<Record<string, unknown>>(`SELECT * FROM difficulty_levels WHERE id IN (${difficultyIds.join(',')})`)
-        : [];
-
-      // Get media blobs
-      const mediaBlobs = await query<Record<string, unknown>>(`
-        SELECT * FROM media_blobs WHERE test_id IN (${testIds})
-      `).catch(() => []);
-
-      // Create export JSON structure
-      const exportData = {
-        version: 1,
-        exported_at: new Date().toISOString(),
-        test_groups: groups,
-        test_subgroups: subgroups,
-        difficulty_levels: difficulties,
-        tests,
-        questions,
-        media_blobs: mediaBlobs,
-      };
-
-      // Export as JSON
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tests_export_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (exportFormat === 'json') {
+        await exportAsJSON(testIds);
+      } else {
+        await exportAsTxt(testIds);
+      }
 
       onClose();
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Failed to export tests');
+      alert('Failed to export tests: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setExporting(false);
     }
   };
 
+  const exportAsJSON = async (testIds: string) => {
+    // Get all data for selected tests
+    const tests = await query<Record<string, unknown>>(`
+      SELECT * FROM tests WHERE test_id IN (${testIds})
+    `);
+    const questions = await query<Record<string, unknown>>(`
+      SELECT * FROM questions WHERE test_id IN (${testIds})
+    `);
+
+    // Get related groups
+    const groupIds = [...new Set(tests.map((t) => t.group_id).filter(Boolean))];
+    const groupsData = groupIds.length > 0 
+      ? await query<Record<string, unknown>>(`SELECT * FROM test_groups WHERE id IN (${groupIds.join(',')})`)
+      : [];
+
+    // Get related subgroups
+    const subgroupIds = [...new Set(tests.map((t) => t.subgroup_id).filter(Boolean))];
+    const subgroups = subgroupIds.length > 0
+      ? await query<Record<string, unknown>>(`SELECT * FROM test_subgroups WHERE id IN (${subgroupIds.join(',')})`)
+      : [];
+
+    // Get related difficulty levels
+    const difficultyIds = [...new Set(tests.map((t) => t.difficulty_level_id).filter(Boolean))];
+    const difficulties = difficultyIds.length > 0
+      ? await query<Record<string, unknown>>(`SELECT * FROM difficulty_levels WHERE id IN (${difficultyIds.join(',')})`)
+      : [];
+
+    // Create export JSON structure
+    const exportData = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      test_groups: groupsData,
+      test_subgroups: subgroups,
+      difficulty_levels: difficulties,
+      tests,
+      questions,
+    };
+
+    // Download
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tests_export_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsTxt = async (testIds: string) => {
+    // Get tests with questions
+    const tests = await query<{ test_id: number; display_name: string; description: string | null }>(`
+      SELECT test_id, display_name, description FROM tests WHERE test_id IN (${testIds}) ORDER BY display_name
+    `);
+
+    const questions = await query<{
+      id: number;
+      question_text: string;
+      id_var: string;
+      options: string;
+      correct_answer: boolean | string | number;
+      test_id: number;
+      explanation: string | null;
+    }>(`
+      SELECT id, question_text, id_var, options, correct_answer, test_id, explanation
+      FROM questions WHERE test_id IN (${testIds}) ORDER BY test_id, id, id_var
+    `);
+
+    // Build text output
+    let output = '';
+
+    for (const test of tests) {
+      output += `${'='.repeat(60)}\n`;
+      output += `TEST: ${test.display_name}\n`;
+      if (test.description) {
+        output += `Description: ${test.description}\n`;
+      }
+      output += `${'='.repeat(60)}\n\n`;
+
+      // Group questions by id
+      const testQuestions = questions.filter(q => q.test_id === test.test_id);
+      const questionMap = new Map<number, { text: string; explanation: string | null; options: { letter: string; text: string; correct: boolean }[] }>();
+
+      for (const q of testQuestions) {
+        if (!questionMap.has(q.id)) {
+          questionMap.set(q.id, { text: q.question_text, explanation: q.explanation, options: [] });
+        }
+        // DuckDB may return boolean as string, number, or actual boolean
+        const isCorrect = q.correct_answer === true || String(q.correct_answer) === 'true' || String(q.correct_answer) === '1';
+        questionMap.get(q.id)!.options.push({
+          letter: q.id_var,
+          text: q.options,
+          correct: isCorrect,
+        });
+      }
+
+      let qNum = 1;
+      for (const [, q] of questionMap) {
+        output += `${qNum}. ${q.text}\n`;
+        for (const opt of q.options) {
+          const marker = opt.correct ? ' ✓' : '';
+          output += `   ${opt.letter}) ${opt.text}${marker}\n`;
+        }
+        if (q.explanation) {
+          output += `   Explanation: ${q.explanation}\n`;
+        }
+        output += '\n';
+        qNum++;
+      }
+
+      output += '\n';
+    }
+
+    // Download
+    const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tests_export_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -183,6 +265,49 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Format selection */}
+              <div className="p-4 bg-slate-800/50 rounded-lg border border-cyan-500/20">
+                <label className="block text-sm font-semibold text-slate-300 mb-3">Export Format</label>
+                <div className="flex gap-3">
+                  <label className={`flex-1 flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    exportFormat === 'json' 
+                      ? 'border-cyan-500 bg-cyan-500/10' 
+                      : 'border-slate-600 hover:border-slate-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="exportFormat"
+                      value="json"
+                      checked={exportFormat === 'json'}
+                      onChange={() => setExportFormat('json')}
+                      className="w-4 h-4 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0 bg-slate-700 border-slate-600"
+                    />
+                    <div>
+                      <span className="font-medium text-slate-200">.json</span>
+                      <p className="text-xs text-slate-400 mt-0.5">Data file for import</p>
+                    </div>
+                  </label>
+                  <label className={`flex-1 flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    exportFormat === 'txt' 
+                      ? 'border-cyan-500 bg-cyan-500/10' 
+                      : 'border-slate-600 hover:border-slate-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="exportFormat"
+                      value="txt"
+                      checked={exportFormat === 'txt'}
+                      onChange={() => setExportFormat('txt')}
+                      className="w-4 h-4 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0 bg-slate-700 border-slate-600"
+                    />
+                    <div>
+                      <span className="font-medium text-slate-200">.txt</span>
+                      <p className="text-xs text-slate-400 mt-0.5">Human-readable text format</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               {/* Select all */}
               <label className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-cyan-500/20 cursor-pointer hover:border-cyan-500/40 transition-colors">
                 <input
@@ -248,7 +373,7 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-cyan-500/20 bg-slate-800/50">
           <span className="text-sm text-slate-400 font-mono">
-            {selectedTests.size} test{selectedTests.size !== 1 ? 's' : ''} selected
+            {selectedTests.size} test{selectedTests.size !== 1 ? 's' : ''} selected • .{exportFormat}
           </span>
           <div className="flex gap-3">
             <button
@@ -268,12 +393,13 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
                   Exporting...
                 </span>
               ) : (
-                `Export ${selectedTests.size} Test${selectedTests.size !== 1 ? 's' : ''}`
+                `Export as .${exportFormat}`
               )}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
