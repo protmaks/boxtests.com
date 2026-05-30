@@ -2,7 +2,20 @@ type RunFn = (sql: string) => Promise<void>;
 type QueryFn = <T>(sql: string) => Promise<T[]>;
 
 function escapeSQL(str: string): string {
-  return str.replace(/'/g, "''");
+  if (!str) return '';
+  
+  // Remove null bytes and other problematic characters
+  let cleaned = str.replace(/\0/g, '');
+  
+  // Escape single quotes for SQL
+  cleaned = cleaned.replace(/'/g, "''");
+  
+  // Limit string length to prevent WASM memory issues (5MB limit)
+  if (cleaned.length > 5000000) {
+    throw new Error('Text is too large (max 5MB). Please reduce image sizes or text length.');
+  }
+  
+  return cleaned;
 }
 
 export async function createQuestion(
@@ -19,23 +32,36 @@ export async function createQuestion(
     }>;
   }
 ): Promise<number> {
-  // Get next question ID for this test
-  const maxId = await query<{ max_id: number | null }>(
-    `SELECT MAX(id) as max_id FROM questions WHERE test_id = ${testId}`
-  );
-  const questionId = (maxId[0]?.max_id || 0) + 1;
+  try {
+    // Get next question ID for this test
+    const maxId = await query<{ max_id: number | null }>(
+      `SELECT MAX(id) as max_id FROM questions WHERE test_id = ${testId}`
+    );
+    const questionId = (maxId[0]?.max_id || 0) + 1;
 
-  const explanation = data.explanation ? `'${escapeSQL(data.explanation)}'` : 'NULL';
+    const explanation = data.explanation ? `'${escapeSQL(data.explanation)}'` : 'NULL';
+    const questionText = escapeSQL(data.question_text);
 
-  // Insert each option as a separate row (denormalized format)
-  for (const option of data.options) {
-    await run(`
-      INSERT INTO questions (id, question_text, id_var, options, correct_answer, test_id, explanation)
-      VALUES (${questionId}, '${escapeSQL(data.question_text)}', '${escapeSQL(option.option_letter)}', '${escapeSQL(option.option_text)}', ${option.is_correct}, ${testId}, ${explanation})
-    `);
+    // Insert each option as a separate row (denormalized format)
+    for (const option of data.options) {
+      const optionText = escapeSQL(option.option_text);
+      const optionLetter = escapeSQL(option.option_letter);
+      
+      await run(`
+        INSERT INTO questions (id, question_text, id_var, options, correct_answer, test_id, explanation)
+        VALUES (${questionId}, '${questionText}', '${optionLetter}', '${optionText}', ${option.is_correct}, ${testId}, ${explanation})
+      `);
+    }
+
+    return questionId;
+  } catch (err) {
+    console.error('Error creating question:', err);
+    throw new Error(
+      'Failed to create question. ' +
+      (err instanceof Error ? err.message : 'Unknown error') +
+      '\n\nTry: Remove special characters or reduce text length.'
+    );
   }
-
-  return questionId;
 }
 
 export async function updateQuestion(

@@ -2,7 +2,20 @@ type RunFn = (sql: string) => Promise<void>;
 type QueryFn = <T>(sql: string) => Promise<T[]>;
 
 function escapeSQL(str: string): string {
-  return str.replace(/'/g, "''");
+  if (!str) return '';
+  
+  // Remove null bytes and other problematic characters
+  let cleaned = str.replace(/\0/g, '');
+  
+  // Escape single quotes for SQL
+  cleaned = cleaned.replace(/'/g, "''");
+  
+  // Limit string length to prevent WASM memory issues
+  if (cleaned.length > 5000000) {
+    throw new Error('Text is too large (max 5MB)');
+  }
+  
+  return cleaned;
 }
 
 export async function createTest(
@@ -17,21 +30,30 @@ export async function createTest(
     tags?: string | null;
   }
 ): Promise<number> {
-  const maxId = await query<{ max_id: number | null }>(`SELECT MAX(test_id) as max_id FROM tests`);
-  const newId = (maxId[0]?.max_id || 0) + 1;
+  try {
+    const maxId = await query<{ max_id: number | null }>(`SELECT MAX(test_id) as max_id FROM tests`);
+    const newId = (maxId[0]?.max_id || 0) + 1;
 
-  const groupId = data.group_id ?? 'NULL';
-  const subgroupId = data.subgroup_id ?? 'NULL';
-  const difficultyId = data.difficulty_level_id ?? 'NULL';
-  const description = data.description ? `'${escapeSQL(data.description)}'` : 'NULL';
-  const tags = data.tags ? `'${escapeSQL(data.tags)}'` : 'NULL';
+    const groupId = data.group_id ?? 'NULL';
+    const subgroupId = data.subgroup_id ?? 'NULL';
+    const difficultyId = data.difficulty_level_id ?? 'NULL';
+    const description = data.description ? `'${escapeSQL(data.description)}'` : 'NULL';
+    const tags = data.tags ? `'${escapeSQL(data.tags)}'` : 'NULL';
+    const displayName = escapeSQL(data.display_name);
 
-  await run(`
-    INSERT INTO tests (test_id, display_name, group_id, subgroup_id, difficulty_level_id, description, tags)
-    VALUES (${newId}, '${escapeSQL(data.display_name)}', ${groupId}, ${subgroupId}, ${difficultyId}, ${description}, ${tags})
-  `);
+    await run(`
+      INSERT INTO tests (test_id, display_name, group_id, subgroup_id, difficulty_level_id, description, tags)
+      VALUES (${newId}, '${displayName}', ${groupId}, ${subgroupId}, ${difficultyId}, ${description}, ${tags})
+    `);
 
-  return newId;
+    return newId;
+  } catch (err) {
+    console.error('Error creating test:', err);
+    throw new Error(
+      'Failed to create test. ' +
+      (err instanceof Error ? err.message : 'Unknown error')
+    );
+  }
 }
 
 export async function updateTest(

@@ -135,9 +135,7 @@ function AppContent() {
       
       <footer className="relative z-10 bg-slate-900/60 backdrop-blur-xl border-t border-cyan-500/20 py-6 text-center">
         <div className="text-sm font-mono">
-          <span className="text-slate-400">BOX-tests © 2024</span>
-          <span className="mx-3 text-cyan-500/30">—</span>
-          <span className="text-cyan-400/80">React + DuckDB WASM</span>
+          <span className="text-cyan-400/80">BOX-tests © 2025</span>
         </div>
         <div className="mt-2 text-xs text-slate-500 font-mono tracking-wider">
           GEOMETRIC PRECISION TESTING

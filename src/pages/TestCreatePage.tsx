@@ -7,6 +7,7 @@ import { createQuestion } from '../db/mutations/questions';
 import type { TestGroup, TestSubgroup, DifficultyLevel } from '../types/quiz';
 import { useSEO } from '../hooks/useSEO';
 import { SEO_CONFIGS } from '../utils/seo';
+import { RichTextEditor } from '../components/RichTextEditor';
 
 type QuestionDraft = {
   id: string;
@@ -113,9 +114,51 @@ export default function TestCreatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate test name
     if (!name.trim()) {
       alert('Enter a test name');
       return;
+    }
+    
+    // Check for null bytes and other problematic characters
+    if (name.includes('\0') || description.includes('\0')) {
+      alert('Test name or description contains invalid characters. Please remove null bytes.');
+      return;
+    }
+
+    // Validate question sizes (Base64 images can be large)
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      
+      // Check for problematic characters
+      if (q.question_text.includes('\0')) {
+        alert(`Question ${i + 1} contains invalid characters (null bytes). Please remove them.`);
+        return;
+      }
+      
+      // Check question size
+      if (q.question_text.length > 1000000) { // 1MB limit per question
+        alert(
+          `Question ${i + 1} is too large (${Math.round(q.question_text.length / 1024)}KB).\n\n` +
+          'Questions with very large images may fail to save.\n' +
+          'Consider using smaller images (under 500KB) or external image URLs.'
+        );
+        return;
+      }
+      
+      // Validate options
+      for (let j = 0; j < q.options.length; j++) {
+        const opt = q.options[j];
+        if (opt.text.includes('\0')) {
+          alert(`Question ${i + 1}, Option ${opt.letter.toUpperCase()} contains invalid characters.`);
+          return;
+        }
+        if (opt.text.length > 100000) { // 100KB limit per option
+          alert(`Question ${i + 1}, Option ${opt.letter.toUpperCase()} is too large (${Math.round(opt.text.length / 1024)}KB).`);
+          return;
+        }
+      }
     }
 
     setSaving(true);
@@ -146,7 +189,21 @@ export default function TestCreatePage() {
       navigate(`/test/${testId}/mode`);
     } catch (err) {
       console.error('Failed to create test:', err);
-      alert('Error creating test');
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      
+      let userMessage = 'Error creating test:\n\n' + errorMessage;
+      
+      // Add specific suggestions based on error type
+      if (errorMessage.includes('memory access out of bounds')) {
+        userMessage += '\n\n💡 This error usually means:\n' +
+          '• Rich text contains unsupported characters\n' +
+          '• Try using plain text instead of formatted text\n' +
+          '• Remove or replace special symbols\n' +
+          '• Check for invisible characters (copy-paste issues)';
+      }
+      
+      userMessage += '\n\nCheck the console for more details.';
+      alert(userMessage);
     } finally {
       setSaving(false);
     }
@@ -265,13 +322,13 @@ export default function TestCreatePage() {
                     ✕
                   </button>
                 </div>
-                <textarea
-                  value={q.question_text}
-                  onChange={(e) => updateQuestion(q.id, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 mb-3"
-                  rows={2}
-                  placeholder="Question text"
-                />
+                <div className="mb-3">
+                  <RichTextEditor
+                    value={q.question_text}
+                    onChange={(html) => updateQuestion(q.id, html)}
+                    placeholder="Enter question text... (you can add images)"
+                  />
+                </div>
                 <div className="space-y-2">
                   {q.options.map((opt, optIdx) => (
                     <div key={opt.letter} className="flex items-center gap-2">

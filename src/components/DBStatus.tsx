@@ -11,14 +11,37 @@ export function DBStatus() {
   const { isLoading, error, isInitialized, cacheSize, clearCache } = useDuckDB();
 
   const handleClearCache = async () => {
-    if (!confirm('Are you sure you want to clear the database cache? This will reset all data to the initial empty state.')) {
+    const confirmed = confirm(
+      '🗑️ Clear Database?\n\n' +
+      'This will DELETE ALL your tests and data!\n\n' +
+      '⚠️ Make sure to export your tests first:\n' +
+      '   1. Click "Export" button\n' +
+      '   2. Select all tests\n' +
+      '   3. Download as JSON\n\n' +
+      '💡 Use this to fix:\n' +
+      '   • "Database corruption" errors\n' +
+      '   • "Checksum" errors\n' +
+      '   • "Memory access out of bounds" errors\n' +
+      '   • Other database issues\n\n' +
+      'Do you want to continue?'
+    );
+    
+    if (!confirmed) {
       return;
     }
+    
     try {
       await clearCache();
+      alert(
+        '✅ Database cleared successfully!\n\n' +
+        'The database has been reset to initial state.\n' +
+        'You can now:\n' +
+        '• Create new tests\n' +
+        '• Import from JSON files'
+      );
     } catch (err) {
       console.error('Failed to clear cache:', err);
-      alert('Failed to clear cache');
+      alert('Failed to clear database: ' + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -55,10 +78,13 @@ export function DBStatus() {
         </div>
         <button
           onClick={handleClearCache}
-          className="px-3 py-1.5 text-sm font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 hover:border-rose-500/50 transition-all"
-          title="Clear database cache"
+          className="group flex items-center gap-1.5 px-3 py-1.5 text-sm font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 hover:border-rose-500/50 transition-all hover:scale-105"
+          title="Clear all database data (use to fix corruption errors)"
         >
-          Clear
+          <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Clear DB
         </button>
       </div>
     );

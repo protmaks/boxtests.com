@@ -97,53 +97,75 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
   };
 
   const exportAsJSON = async (testIds: string) => {
-    // Get all data for selected tests
-    const tests = await query<Record<string, unknown>>(`
-      SELECT * FROM tests WHERE test_id IN (${testIds})
-    `);
-    const questions = await query<Record<string, unknown>>(`
-      SELECT * FROM questions WHERE test_id IN (${testIds})
-    `);
+    try {
+      // Force checkpoint to ensure data consistency
+      if (conn) {
+        await conn.query('CHECKPOINT');
+      }
+      
+      // Get all data for selected tests
+      const tests = await query<Record<string, unknown>>(`
+        SELECT * FROM tests WHERE test_id IN (${testIds})
+      `);
+      const questions = await query<Record<string, unknown>>(`
+        SELECT * FROM questions WHERE test_id IN (${testIds})
+      `);
 
-    // Get related groups
-    const groupIds = [...new Set(tests.map((t) => t.group_id).filter(Boolean))];
-    const groupsData = groupIds.length > 0 
-      ? await query<Record<string, unknown>>(`SELECT * FROM test_groups WHERE id IN (${groupIds.join(',')})`)
-      : [];
+      // Get related groups
+      const groupIds = [...new Set(tests.map((t) => t.group_id).filter(Boolean))];
+      const groupsData = groupIds.length > 0 
+        ? await query<Record<string, unknown>>(`SELECT * FROM test_groups WHERE id IN (${groupIds.join(',')})`)
+        : [];
 
-    // Get related subgroups
-    const subgroupIds = [...new Set(tests.map((t) => t.subgroup_id).filter(Boolean))];
-    const subgroups = subgroupIds.length > 0
-      ? await query<Record<string, unknown>>(`SELECT * FROM test_subgroups WHERE id IN (${subgroupIds.join(',')})`)
-      : [];
+      // Get related subgroups
+      const subgroupIds = [...new Set(tests.map((t) => t.subgroup_id).filter(Boolean))];
+      const subgroups = subgroupIds.length > 0
+        ? await query<Record<string, unknown>>(`SELECT * FROM test_subgroups WHERE id IN (${subgroupIds.join(',')})`)
+        : [];
 
-    // Get related difficulty levels
-    const difficultyIds = [...new Set(tests.map((t) => t.difficulty_level_id).filter(Boolean))];
-    const difficulties = difficultyIds.length > 0
-      ? await query<Record<string, unknown>>(`SELECT * FROM difficulty_levels WHERE id IN (${difficultyIds.join(',')})`)
-      : [];
+      // Get related difficulty levels
+      const difficultyIds = [...new Set(tests.map((t) => t.difficulty_level_id).filter(Boolean))];
+      const difficulties = difficultyIds.length > 0
+        ? await query<Record<string, unknown>>(`SELECT * FROM difficulty_levels WHERE id IN (${difficultyIds.join(',')})`)
+        : [];
 
-    // Create export JSON structure
-    const exportData = {
-      version: 1,
-      exported_at: new Date().toISOString(),
-      test_groups: groupsData,
-      test_subgroups: subgroups,
-      difficulty_levels: difficulties,
-      tests,
-      questions,
-    };
+      // Create export JSON structure
+      const exportData = {
+        version: 1,
+        exported_at: new Date().toISOString(),
+        test_groups: groupsData,
+        test_subgroups: subgroups,
+        difficulty_levels: difficulties,
+        tests,
+        questions,
+      };
 
-    // Download
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tests_export_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      // Download
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tests_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('JSON export error:', err);
+      
+      // Provide helpful error message
+      if (err instanceof Error && err.message.includes('checksum')) {
+        throw new Error(
+          'Database corruption detected. Your database file is corrupted.\n\n' +
+          'Try these steps:\n' +
+          '1. Click "Clear Database" to start fresh\n' +
+          '2. Recreate your tests\n' +
+          '3. Use Export → JSON regularly for backups\n' +
+          '4. Avoid using Save button for tests with images'
+        );
+      }
+      throw err;
+    }
   };
 
   const exportAsTxt = async (testIds: string) => {
