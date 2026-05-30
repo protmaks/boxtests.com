@@ -1,7 +1,26 @@
 import { useDuckDB } from '../context/DuckDBContext';
 
+function formatBytes(bytes: number | null): string {
+  if (bytes === null || bytes === 0) return '0 KB';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
 export function DBStatus() {
-  const { isLoading, error, isInitialized } = useDuckDB();
+  const { isLoading, error, isInitialized, cacheSize, clearCache } = useDuckDB();
+
+  const handleClearCache = async () => {
+    if (!confirm('Are you sure you want to clear the database cache? This will reset all data to the initial empty state.')) {
+      return;
+    }
+    try {
+      await clearCache();
+    } catch (err) {
+      console.error('Failed to clear cache:', err);
+      alert('Failed to clear cache');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -26,9 +45,21 @@ export function DBStatus() {
 
   if (isInitialized) {
     return (
-      <div className="flex items-center gap-2 text-sm font-mono px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-        <span className="text-emerald-400">DuckDB Online</span>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-sm font-mono px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span className="text-emerald-400">DuckDB Online</span>
+          {cacheSize !== null && (
+            <span className="text-emerald-400/70 ml-1">({formatBytes(cacheSize)})</span>
+          )}
+        </div>
+        <button
+          onClick={handleClearCache}
+          className="px-3 py-1.5 text-sm font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 hover:border-rose-500/50 transition-all"
+          title="Clear database cache"
+        >
+          Clear
+        </button>
       </div>
     );
   }

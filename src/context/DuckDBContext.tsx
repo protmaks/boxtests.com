@@ -21,6 +21,9 @@ interface DuckDBContextValue {
   exportToBlob: () => Promise<Blob>;
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
+  cacheSize: number | null;
+  clearCache: () => Promise<void>;
+  refreshCacheSize: () => Promise<void>;
 }
 
 const DuckDBContext = createContext<DuckDBContextValue | null>(null);
@@ -34,6 +37,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [cacheSize, setCacheSize] = useState<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -73,6 +77,8 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
           setConn(connection);
           setIsInitialized(true);
           setIsLoading(false);
+          // Refresh cache size after initialization
+          getOPFSCacheSize().then(setCacheSize).catch(() => setCacheSize(null));
         }
       } catch (err) {
         if (mounted) {
@@ -140,6 +146,9 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
 
       // Save to OPFS
       await saveToOPFS(db, newConn);
+      // Refresh cache size
+      const size = await getOPFSCacheSize();
+      setCacheSize(size);
     },
     [db, conn]
   );
@@ -156,10 +165,38 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
 
     // Save to OPFS (checkpoint already done)
     await saveToOPFS(db);
+    // Refresh cache size
+    const size = await getOPFSCacheSize();
+    setCacheSize(size);
 
     // Convert to ArrayBuffer for Blob compatibility
     const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
     return new Blob([arrayBuffer], { type: 'application/octet-stream' });
+  }, [db, conn]);
+
+  const refreshCacheSize = useCallback(async (): Promise<void> => {
+    const size = await getOPFSCacheSize();
+    setCacheSize(size);
+  }, []);
+
+  const clearCache = useCallback(async (): Promise<void> => {
+    if (!db || !conn) throw new Error('Database not initialized');
+
+    // Clear OPFS
+    await clearOPFSCache();
+    setCacheSize(null);
+
+    // Reset database: close connection, drop files, reinitialize schema
+    await conn.close();
+    await db.open({ path: ':memory:' });
+    await db.dropFile('data.duckdb').catch(() => {});
+    await db.dropFile('data.duckdb.wal').catch(() => {});
+
+    // Reinitialize with fresh schema
+    const newConn = await db.connect();
+    await initializeSchema({ run: (sql) => newConn.query(sql).then(() => {}) });
+    setConn(newConn);
+    setHasUnsavedChanges(false);
   }, [db, conn]);
 
   return (
@@ -176,6 +213,9 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
         exportToBlob,
         hasUnsavedChanges,
         setHasUnsavedChanges,
+        cacheSize,
+        clearCache,
+        refreshCacheSize,
       }}
     >
       {children}
@@ -193,7 +233,7 @@ export function useDuckDB(): DuckDBContextValue {
 
 // OPFS helpers
 async function tryLoadFromOPFS(
-  _db: duckdb.AsyncDuckDB,
+  db: duckdb.AsyncDuckDB,
   _conn: duckdb.AsyncDuckDBConnection
 ): Promise<boolean> {
   if (!('storage' in navigator) || !('getDirectory' in navigator.storage)) {
@@ -210,10 +250,18 @@ async function tryLoadFromOPFS(
       return false;
     }
 
-    // File exists but we'll load it via importFromFile pattern
-    console.log('Found existing database in OPFS');
-    return false; // For now, always start fresh - TODO: implement proper loading
-  } catch {
+    // Load the database from OPFS
+    const uint8Array = new Uint8Array(buffer);
+    await db.registerFileBuffer('data.duckdb', uint8Array);
+    await db.open({
+      path: 'data.duckdb',
+      accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
+    });
+
+    console.log('Loaded database from OPFS');
+    return true;
+  } catch (err) {
+    console.warn('Failed to load from OPFS:', err);
     return false;
   }
 }
@@ -241,5 +289,34 @@ async function saveToOPFS(db: duckdb.AsyncDuckDB, conn?: duckdb.AsyncDuckDBConne
     console.log('Saved to OPFS');
   } catch (err) {
     console.error('Failed to save to OPFS:', err);
+  }
+}
+
+async function getOPFSCacheSize(): Promise<number | null> {
+  if (!('storage' in navigator) || !('getDirectory' in navigator.storage)) {
+    return null;
+  }
+
+  try {
+    const root = await navigator.storage.getDirectory();
+    const fileHandle = await root.getFileHandle('pm_tester.duckdb', { create: false });
+    const file = await fileHandle.getFile();
+    return file.size;
+  } catch {
+    return null;
+  }
+}
+
+async function clearOPFSCache(): Promise<void> {
+  if (!('storage' in navigator) || !('getDirectory' in navigator.storage)) {
+    return;
+  }
+
+  try {
+    const root = await navigator.storage.getDirectory();
+    await root.removeEntry('pm_tester.duckdb');
+    console.log('Cleared OPFS cache');
+  } catch (err) {
+    console.warn('Failed to clear OPFS cache:', err);
   }
 }
