@@ -72,23 +72,59 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
           connection = loadedConn;
           console.log('Using existing database from OPFS');
         } else {
-          // Create fresh file-backed database (not in-memory)
+          // Create fresh file-backed database from template
           // Clean up any old/corrupted files first
           await database.dropFile('data.duckdb').catch(() => {});
           await database.dropFile('data.duckdb.wal').catch(() => {});
           console.log('Cleaned up old database files');
           
-          await database.open({
-            path: 'data.duckdb',
-            accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
-          });
-          console.log('New file-backed database opened');
+          // Try to load template database
+          let templateLoaded = false;
+          try {
+            console.log('Fetching template database...');
+            const response = await fetch('/empty_db.duckdb');
+            if (!response.ok) {
+              throw new Error(`Failed to fetch template: ${response.status}`);
+            }
+            
+            const buffer = await response.arrayBuffer();
+            const uint8Array = new Uint8Array(buffer);
+            
+            if (uint8Array.length === 0) {
+              throw new Error('Template database is empty');
+            }
+            
+            console.log(`Template database loaded: ${uint8Array.length} bytes`);
+            
+            // Register and open template database
+            await database.registerFileBuffer('data.duckdb', uint8Array);
+            await database.open({
+              path: 'data.duckdb',
+              accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
+            });
+            
+            connection = await database.connect();
+            templateLoaded = true;
+            console.log('Initialized from template database');
+          } catch (err) {
+            console.warn('Failed to load template database, falling back to SQL schema:', err);
+            templateLoaded = false;
+          }
           
-          connection = await database.connect();
-          await initializeSchema({ run: (sql) => connection.query(sql).then(() => {}) });
-          console.log('Schema initialized');
+          // Fallback: create with SQL schema if template failed
+          if (!templateLoaded) {
+            await database.open({
+              path: 'data.duckdb',
+              accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
+            });
+            console.log('New file-backed database opened');
+            
+            connection = await database.connect();
+            await initializeSchema({ run: (sql) => connection.query(sql).then(() => {}) });
+            console.log('Schema initialized (SQL fallback)');
+          }
           
-          // Force checkpoint to ensure schema is written
+          // Force checkpoint to ensure data is written
           await connection.query('CHECKPOINT');
           await database.flushFiles();
           console.log('Changes flushed to disk');
