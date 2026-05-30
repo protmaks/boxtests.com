@@ -12,7 +12,7 @@ function AppContent() {
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <nav className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/boxtests.svg" alt="BOX-tests logo" className="h-8 w-auto" />
+            <img src="/logo.svg" alt="BOX-tests logo" className="h-8 w-auto" />
             <span className="text-xl font-bold text-indigo-600">BOX-tests</span>
           </Link>
           <div className="flex gap-6 items-center">
