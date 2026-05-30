@@ -10,6 +10,7 @@ import TestCreatePage from './pages/TestCreatePage';
 import TestEditPage from './pages/TestEditPage';
 import ManageGroupsPage from './pages/ManageGroupsPage';
 import ManageDifficultyPage from './pages/ManageDifficultyPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 export const router = createBrowserRouter(
   [
@@ -27,6 +28,7 @@ export const router = createBrowserRouter(
         { path: 'test/:id/edit', element: <TestEditPage /> },
         { path: 'manage/groups', element: <ManageGroupsPage /> },
         { path: 'manage/difficulty', element: <ManageDifficultyPage /> },
+        { path: '*', element: <NotFoundPage /> },
       ],
     },
   ]
