@@ -79,7 +79,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
           // console.log('Cleaned up old database files');
           
           // Try to load template database
-          let templateLoaded = false;
+          let templateConnection: duckdb.AsyncDuckDBConnection | null = null;
           try {
             // console.log('Fetching template database...');
             const response = await fetch('/empty_db.duckdb');
@@ -103,26 +103,26 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
               accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
             });
             
-            connection = await database.connect();
-            templateLoaded = true;
+            templateConnection = await database.connect();
             // console.log('Initialized from template database');
           } catch (err) {
             console.warn('Failed to load template database, falling back to SQL schema:', err);
-            templateLoaded = false;
           }
           
           // Fallback: create with SQL schema if template failed
-          if (!templateLoaded) {
+          if (!templateConnection) {
             await database.open({
               path: 'data.duckdb',
               accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
             });
             // console.log('New file-backed database opened');
             
-            connection = await database.connect();
-            await initializeSchema({ run: (sql) => connection.query(sql).then(() => {}) });
+            templateConnection = await database.connect();
+            await initializeSchema({ run: (sql) => templateConnection!.query(sql).then(() => {}) });
             // console.log('Schema initialized (SQL fallback)');
           }
+          
+          connection = templateConnection;
           
           // Force checkpoint to ensure data is written
           await connection.query('CHECKPOINT');
