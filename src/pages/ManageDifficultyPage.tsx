@@ -76,7 +76,7 @@ export default function ManageDifficultyPage() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4 text-white">Add Level</h2>
+        <h2 className="text-lg font-semibold mb-4 text-black">Add Level</h2>
         <form onSubmit={handleAdd} className="flex gap-2">
           <select
             value={newGroupId ?? ''}
@@ -125,7 +125,7 @@ export default function ManageDifficultyPage() {
           {groupedLevels.map(({ group, levels: groupLevels }) => (
             <div key={group.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <h3
-                className="text-lg font-semibold mb-4 flex items-center gap-2 text-white"
+                className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-400"
               >
                 <span
                   className="w-3 h-3 rounded-full"

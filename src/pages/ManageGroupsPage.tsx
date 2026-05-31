@@ -81,7 +81,7 @@ export default function ManageGroupsPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Groups */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-white">Groups ({groups.length})</h2>
+          <h2 className="text-lg font-semibold mb-4 text-black">Groups ({groups.length})</h2>
           
           <form onSubmit={handleAddGroup} className="flex gap-2 mb-4">
             <input
@@ -119,7 +119,7 @@ export default function ManageGroupsPage() {
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: g.color }}
                     />
-                    <span className="text-white">{g.name}</span>
+                    <span className="text-gray-400">{g.name}</span>
                   </div>
                   <button
                     onClick={() => handleDeleteGroup(g.id)}
@@ -135,7 +135,7 @@ export default function ManageGroupsPage() {
 
         {/* Subgroups */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4 text-white">Subgroups ({subgroups.length})</h2>
+          <h2 className="text-lg font-semibold mb-4 text-black">Subgroups ({subgroups.length})</h2>
           
           <form onSubmit={handleAddSubgroup} className="flex gap-2 mb-4">
             <select
@@ -180,7 +180,7 @@ export default function ManageGroupsPage() {
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: s.color }}
                       />
-                      <span className="text-white">{s.name}</span>
+                      <span className="text-gray-400">{s.name}</span>
                       {group && (
                         <span className="text-xs text-gray-500">({group.name})</span>
                       )}

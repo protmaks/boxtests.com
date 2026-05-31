@@ -64,7 +64,7 @@ export default function TestModeSelector() {
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-2 text-white">{test.display_name}</h1>
       {test.description && (
-        <p className="text-gray-600 dark:text-gray-400 mb-6">{test.description}</p>
+        <p className="text-gray-400 dark:text-white mb-6">{test.description}</p>
       )}
 
       {hasProgress && (

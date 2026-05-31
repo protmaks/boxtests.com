@@ -307,7 +307,7 @@ export default function TestInstantPage() {
       </div>
 
       <div className="mt-4 text-center">
-        <Link to={`/test/${id}/mode`} className="text-indigo-600 hover:underline text-sm">
+        <Link to={`/test/${id}/mode`} className="text-gray-400 hover:underline text-sm">
           Choose another mode
         </Link>
       </div>
