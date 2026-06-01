@@ -92,52 +92,52 @@ export function DBStatus() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm font-mono text-cyan-400">
-        <div className="relative w-4 h-4">
+      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-mono text-cyan-400">
+        <div className="relative w-2.5 sm:w-3 h-2.5 sm:h-3">
           <div className="absolute inset-0 border-2 border-cyan-500/30 rounded-full"></div>
           <div className="absolute inset-0 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <span className="animate-pulse">Initializing DuckDB...</span>
+        <span className="animate-pulse hidden sm:inline">Initializing DuckDB...</span>
+        <span className="animate-pulse sm:hidden">Init...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center gap-2 text-sm font-mono text-rose-400 px-3 py-1.5 bg-rose-500/10 border border-rose-500/30 rounded-lg">
-        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-mono text-rose-400 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-rose-500/10 border border-rose-500/30 rounded">
+        <svg className="w-2.5 sm:w-3 h-2.5 sm:h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
-        <span>DB Error: {error.message}</span>
+        <span className="hidden sm:inline">DB Error: {error.message}</span>
+        <span className="sm:hidden">Error</span>
       </div>
     );
   }
 
   if (isInitialized) {
     return (
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-mono px-2 sm:px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg whitespace-nowrap">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-            <span className="text-emerald-400">DuckDB Online</span>
-            {cacheSize !== null &&(
-              <span className="text-emerald-400/70 ml-1">({formatBytes(cacheSize)})</span>
-            )}
-          </div>
-          <button
-            onClick={handleLoadExample}
-            className="text-xs text-cyan-400 hover:text-cyan-300 underline font-mono px-2 transition-colors"
-            title="Load example database with sample data"
-          >
-            load example
-          </button>
+      <div className="flex items-center gap-0.5 sm:gap-1.5">
+        <div className="flex items-center gap-0.5 sm:gap-1.5 text-[9px] sm:text-xs font-mono px-1 sm:px-2 py-0.5 sm:py-1 bg-emerald-500/10 border border-emerald-500/30 rounded whitespace-nowrap">
+          <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span className="text-emerald-400">DB</span>
+          {cacheSize !== null &&(
+            <span className="text-emerald-400/70 hidden sm:inline">({formatBytes(cacheSize)})</span>
+          )}
         </div>
         <button
+          onClick={handleLoadExample}
+          className="text-[8px] sm:text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono px-0.5 sm:px-1 transition-colors"
+          title="Load example database with sample data"
+        >
+          example
+        </button>
+        <button
           onClick={handleClearCache}
-          className="group flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg hover:bg-rose-500/20 hover:border-rose-500/50 transition-all hover:scale-105 whitespace-nowrap"
+          className="group flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-xs font-mono text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded hover:bg-rose-500/20 hover:border-rose-500/50 transition-all whitespace-nowrap min-w-[20px] sm:min-w-0"
           title="Clear all database data (use to fix corruption errors)"
         >
-          <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 sm:w-3 h-3 sm:h-3 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
