@@ -107,6 +107,59 @@ export default function HomePage() {
           <div className="text-xs text-slate-500 font-mono">Start testing immediately</div>
         </div>
       </div>
+
+      {/* Use Cases Section */}
+      <div className="relative z-10 mt-16 max-w-4xl w-full animate-slide-in" style={{ animationDelay: '0.8s' }}>
+        <h2 className="text-2xl font-bold text-center text-slate-200 mb-8">
+          Perfect For
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            to="/self-study-quiz-maker"
+            className="group p-6 rounded-xl bg-slate-900/30 border border-slate-700/30 hover:border-cyan-500/30 hover:bg-slate-800/30 transition-all duration-300"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-slate-200 group-hover:text-cyan-400 transition-colors">Self-Study</h3>
+            </div>
+            <p className="text-sm text-slate-400">Create quizzes for active recall and self-assessment</p>
+          </Link>
+
+          <Link
+            to="/offline-test-creator"
+            className="group p-6 rounded-xl bg-slate-900/30 border border-slate-700/30 hover:border-cyan-500/30 hover:bg-slate-800/30 transition-all duration-300"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-slate-200 group-hover:text-cyan-400 transition-colors">Offline Use</h3>
+            </div>
+            <p className="text-sm text-slate-400">Study anywhere without internet connection</p>
+          </Link>
+
+          <Link
+            to="/privacy-flashcards"
+            className="group p-6 rounded-xl bg-slate-900/30 border border-slate-700/30 hover:border-cyan-500/30 hover:bg-slate-800/30 transition-all duration-300"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-slate-200 group-hover:text-cyan-400 transition-colors">Privacy-First</h3>
+            </div>
+            <p className="text-sm text-slate-400">No accounts, no tracking, data stays local</p>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

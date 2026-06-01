@@ -13,6 +13,11 @@ import ManageDifficultyPage from './pages/ManageDifficultyPage';
 import NotFoundPage from './pages/NotFoundPage';
 import HelpPage from './pages/HelpPage';
 
+// Landing pages for SEO
+import SelfStudyQuizMakerPage from './pages/landing/SelfStudyQuizMakerPage';
+import OfflineTestCreatorPage from './pages/landing/OfflineTestCreatorPage';
+import PrivacyFlashcardsPage from './pages/landing/PrivacyFlashcardsPage';
+
 export const router = createBrowserRouter(
   [
     {
@@ -30,6 +35,10 @@ export const router = createBrowserRouter(
         { path: 'manage/groups', element: <ManageGroupsPage /> },
         { path: 'manage/difficulty', element: <ManageDifficultyPage /> },
         { path: 'help', element: <HelpPage /> },
+        // SEO Landing Pages
+        { path: 'self-study-quiz-maker', element: <SelfStudyQuizMakerPage /> },
+        { path: 'offline-test-creator', element: <OfflineTestCreatorPage /> },
+        { path: 'privacy-flashcards', element: <PrivacyFlashcardsPage /> },
         { path: '*', element: <NotFoundPage /> },
       ],
     },

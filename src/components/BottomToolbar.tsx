@@ -44,7 +44,7 @@ export function BottomToolbar() {
   };
 
   return (
-    <div className="relative z-10 bg-slate-800/90 backdrop-blur-xl border-b border-cyan-500/30 shadow-[0_0_20px_rgba(14,165,233,0.15)]">
+    <div className="sticky top-[88px] z-40 bg-slate-800/90 backdrop-blur-xl border-b border-cyan-500/30 shadow-[0_0_20px_rgba(14,165,233,0.15)]">
       <div className="max-w-6xl mx-auto px-1 sm:px-4 py-0.5 sm:py-1">
         <div className="flex items-center justify-between gap-0.5 sm:gap-3 overflow-x-auto">
           {/* Left: Database status label + Open */}

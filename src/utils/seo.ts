@@ -147,4 +147,27 @@ export const SEO_CONFIGS = {
     url: '/manage/difficulty',
     type: 'website',
   },
+  
+  // Landing Pages for SEO
+  selfStudyQuizMaker: {
+    title: 'Self-Study Quiz Maker — Create Personal Study Quizzes | BOX-tests',
+    description: 'Create custom study quizzes for self-testing. Active recall and spaced repetition made easy. No account needed, works offline, 100% private.',
+    keywords: 'self-study quiz maker, create study quiz, personal quiz tool, self-assessment tool, active recall app, study quiz generator, flashcard quiz maker',
+    url: '/self-study-quiz-maker',
+    type: 'website',
+  },
+  offlineTestCreator: {
+    title: 'Offline Test Creator — Quiz App That Works Without Internet | BOX-tests',
+    description: 'Create and take tests offline. No internet required — powered by DuckDB WASM. Perfect for travel, exams, or areas with poor connectivity.',
+    keywords: 'offline test creator, offline quiz app, test maker without internet, no-internet quiz tool, works offline quiz, local quiz app',
+    url: '/offline-test-creator',
+    type: 'website',
+  },
+  privacyFlashcards: {
+    title: 'Privacy-First Flashcards — Study App Without Tracking | BOX-tests',
+    description: 'Study with complete privacy. No accounts, no cloud, no tracking. Your data stays on your device. The secure alternative to Quizlet and Anki.',
+    keywords: 'privacy-first flashcards, private flashcard app, secure study tool, no-account quiz app, anonymous learning app, flashcards without login',
+    url: '/privacy-flashcards',
+    type: 'website',
+  },
 } as const;

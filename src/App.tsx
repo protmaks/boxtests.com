@@ -18,7 +18,7 @@ function AppContent() {
       {/* Backdrop blur layer */}
       <div className="fixed inset-0 backdrop-blur-[1px] pointer-events-none z-0"></div>
       
-      <header className="relative z-10 bg-slate-900/80 backdrop-blur-xl border-b border-cyan-500/20 shadow-[0_0_30px_rgba(14,165,233,0.15)]">
+      <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-cyan-500/20 shadow-[0_0_30px_rgba(14,165,233,0.15)]">
         <nav className="max-w-6xl mx-auto px-4 py-3 sm:py-5 flex items-center justify-between">
           <Link 
             to="/" 
@@ -45,26 +45,53 @@ function AppContent() {
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-1 items-center">
             <Link
+              to="/create"
+              className="relative px-4 py-2 text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] transition-all duration-200 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Create Test</span>
+            </Link>
+            <Link
               to="/tests"
               className="relative px-4 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors duration-200 group"
             >
               <span className="relative z-10">Tests</span>
               <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 rounded-lg transition-all duration-200"></div>
             </Link>
-            <Link
-              to="/manage/groups"
-              className="relative px-4 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors duration-200 group"
-            >
-              <span className="relative z-10">Groups</span>
-              <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 rounded-lg transition-all duration-200"></div>
-            </Link>
-            <Link
-              to="/manage/difficulty"
-              className="relative px-4 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors duration-200 group"
-            >
-              <span className="relative z-10">Difficulty</span>
-              <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 rounded-lg transition-all duration-200"></div>
-            </Link>
+            
+            {/* Use Cases Dropdown */}
+            <div className="relative group">
+              <button className="relative px-4 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors duration-200 flex items-center gap-1">
+                <span className="relative z-10">Use Cases</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 rounded-lg transition-all duration-200"></div>
+              </button>
+              <div className="absolute top-full left-0 mt-1 w-56 bg-slate-900/95 backdrop-blur-xl border border-cyan-500/20 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <Link
+                  to="/self-study-quiz-maker"
+                  className="block px-4 py-3 text-sm text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors first:rounded-t-lg"
+                >
+                  Self-Study Quiz Maker
+                </Link>
+                <Link
+                  to="/offline-test-creator"
+                  className="block px-4 py-3 text-sm text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
+                >
+                  Offline Test Creator
+                </Link>
+                <Link
+                  to="/privacy-flashcards"
+                  className="block px-4 py-3 text-sm text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors last:rounded-b-lg"
+                >
+                  Privacy-First Flashcards
+                </Link>
+              </div>
+            </div>
+            
             <Link
               to="/help"
               className="relative px-4 py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors duration-200 group"
@@ -114,26 +141,51 @@ function AppContent() {
           <div className="md:hidden bg-slate-900/95 backdrop-blur-xl border-t border-cyan-500/10">
             <div className="px-4 py-3 space-y-1">
               <Link
+                to="/create"
+                className="block px-4 py-3 text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg transition-all flex items-center gap-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create Test
+              </Link>
+              <Link
                 to="/tests"
                 className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Tests
               </Link>
-              <Link
-                to="/manage/groups"
-                className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Groups
-              </Link>
-              <Link
-                to="/manage/difficulty"
-                className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Difficulty
-              </Link>
+              
+              {/* Use Cases Section */}
+              <div className="pt-2 pb-1">
+                <div className="px-4 py-2 text-xs font-semibold text-cyan-400/60 uppercase tracking-wider">
+                  Use Cases
+                </div>
+                <Link
+                  to="/self-study-quiz-maker"
+                  className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Self-Study Quiz Maker
+                </Link>
+                <Link
+                  to="/offline-test-creator"
+                  className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Offline Test Creator
+                </Link>
+                <Link
+                  to="/privacy-flashcards"
+                  className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Privacy-First Flashcards
+                </Link>
+              </div>
+              
               <Link
                 to="/help"
                 className="block px-4 py-3 text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
