@@ -218,7 +218,15 @@ export default function TestModeSelector() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2 text-white">{test.display_name}</h1>
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-2xl font-bold text-white">{test.display_name}</h1>
+        <Link
+          to={`/test/${id}/edit`}
+          className="px-4 py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+        >
+          Edit Test
+        </Link>
+      </div>
       {test.description && (
         <p className="text-gray-400 dark:text-white mb-6">{test.description}</p>
       )}
