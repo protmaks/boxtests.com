@@ -28,16 +28,16 @@
     <text x="380" y="200" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#e2e8f0">-tests</text>
     
     <!-- Tagline -->
-    <text x="220" y="250" font-family="monospace" font-size="32" fill="#06b6d4" opacity="0.9">Infrastructure for Knowledge</text>
+    <text x="220" y="250" font-family="monospace" font-size="32" fill="#06b6d4" opacity="0.9">Self-Testing Made Simple</text>
     
     <!-- Description -->
-    <text x="100" y="340" font-family="Arial, sans-serif" font-size="28" fill="#94a3b8">Create, manage, and take tests with</text>
-    <text x="100" y="380" font-family="Arial, sans-serif" font-size="28" fill="#94a3b8">blazing-fast local analytics</text>
+    <text x="100" y="340" font-family="Arial, sans-serif" font-size="28" fill="#94a3b8">Create tests, take them, and track your</text>
+    <text x="100" y="380" font-family="Arial, sans-serif" font-size="28" fill="#94a3b8">progress — 100% local &amp; private</text>
     
     <!-- Features -->
-    <text x="100" y="470" font-family="monospace" font-size="22" fill="#06b6d4">✓ 100% Local First</text>
-    <text x="100" y="510" font-family="monospace" font-size="22" fill="#06b6d4">✓ Instant Statistics</text>
-    <text x="100" y="550" font-family="monospace" font-size="22" fill="#06b6d4">✓ Unlimited Tests</text>
+    <text x="100" y="470" font-family="monospace" font-size="22" fill="#06b6d4">✓ 100% Private</text>
+    <text x="100" y="510" font-family="monospace" font-size="22" fill="#06b6d4">✓ No Account Required</text>
+    <text x="100" y="550" font-family="monospace" font-size="22" fill="#06b6d4">✓ Instant Results</text>
     
     <!-- Domain -->
     <text x="950" y="580" font-family="monospace" font-size="20" fill="#64748b" text-anchor="end">boxtests.com</text>

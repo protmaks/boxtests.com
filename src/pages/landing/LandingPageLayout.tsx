@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useSEO } from '../../hooks/useSEO';
 import type { SEOConfig } from '../../utils/seo';
 import { WorkflowDemo } from '../../components/WorkflowDemo';

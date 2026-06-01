@@ -7,63 +7,68 @@
   <!-- Homepage -->
   <url>
     <loc>https://boxtests.com/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
-  <!-- Tests List Page -->
-  <url>
-    <loc>https://boxtests.com/tests</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- Create Test Page -->
-  <url>
-    <loc>https://boxtests.com/create</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Manage Groups Page -->
-  <url>
-    <loc>https://boxtests.com/manage/groups</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- Manage Difficulty Page -->
-  <url>
-    <loc>https://boxtests.com/manage/difficulty</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- SEO Landing Pages -->
+  <!-- SEO Landing Pages (High Priority for Organic Traffic) -->
   <url>
     <loc>https://boxtests.com/self-study-quiz-maker</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://boxtests.com/offline-test-creator</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://boxtests.com/privacy-flashcards</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Core Application Pages -->
+  <url>
+    <loc>https://boxtests.com/tests</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://boxtests.com/create</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://boxtests.com/help</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Management Pages -->
+  <url>
+    <loc>https://boxtests.com/manage/groups</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://boxtests.com/manage/difficulty</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   
 </urlset>

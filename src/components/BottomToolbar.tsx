@@ -5,8 +5,8 @@ import { useRef, useState } from 'react';
 import { ExportModal } from './ExportModal';
 
 export function BottomToolbar() {
-  const { importFromFile, exportToBlob, isLoading, query } = useDuckDB();
-  const { showNotification, showConfirm } = useNotification();
+  const { importFromFile, exportToBlob, isLoading } = useDuckDB();
+  const { showNotification } = useNotification();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 

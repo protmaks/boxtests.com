@@ -2,12 +2,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useDB } from '../hooks/useDB';
 import { getAllGroups, getAllSubgroups, getAllDifficultyLevels } from '../db/queries/groups';
+import { createGroup, createSubgroup, createDifficultyLevel } from '../db/mutations/groups';
 import { createTest } from '../db/mutations/tests';
 import { createQuestion } from '../db/mutations/questions';
 import type { TestGroup, TestSubgroup, DifficultyLevel } from '../types/quiz';
 import { useSEO } from '../hooks/useSEO';
 import { SEO_CONFIGS } from '../utils/seo';
 import { RichTextEditor } from '../components/RichTextEditor';
+import { InlineCreateSelect } from '../components/InlineCreateSelect';
 
 type QuestionDraft = {
   id: string;
@@ -37,20 +39,19 @@ export default function TestCreatePage() {
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [saving, setSaving] = useState(false);
 
+  const loadData = async () => {
+    const [g, s, d] = await Promise.all([
+      getAllGroups(query),
+      getAllSubgroups(query),
+      getAllDifficultyLevels(query),
+    ]);
+    setGroups(g);
+    setSubgroups(s);
+    setDifficulties(d);
+  };
+
   useEffect(() => {
     if (!isInitialized) return;
-
-    async function loadData() {
-      const [g, s, d] = await Promise.all([
-        getAllGroups(query),
-        getAllSubgroups(query),
-        getAllDifficultyLevels(query),
-      ]);
-      setGroups(g);
-      setSubgroups(s);
-      setDifficulties(d);
-    }
-
     loadData();
   }, [query, isInitialized]);
 
@@ -262,57 +263,68 @@ export default function TestCreatePage() {
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Group</label>
-              <select
-                value={groupId ?? ''}
-                onChange={(e) => {
-                  setGroupId(e.target.value ? parseInt(e.target.value) : null);
-                  setSubgroupId(null);
-                  setDifficultyId(null);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-              >
-                <option value="">No Group</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Subgroup</label>
-              <select
-                value={subgroupId ?? ''}
-                onChange={(e) => setSubgroupId(e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-                disabled={!groupId}
-              >
-                <option value="">—</option>
-                {filteredSubgroups.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Difficulty</label>
-              <select
-                value={difficultyId ?? ''}
-                onChange={(e) => setDifficultyId(e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-                disabled={!groupId}
-              >
-                <option value="">—</option>
-                {filteredDifficulties.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <InlineCreateSelect
+              label="Group"
+              value={groupId}
+              onChange={(value) => {
+                setGroupId(value);
+                setSubgroupId(null);
+                setDifficultyId(null);
+              }}
+              options={groups}
+              onCreateNew={async (data) => {
+                const newId = await createGroup(run, query, data);
+                return newId;
+              }}
+              onRefresh={loadData}
+              createLabel="Create New Group"
+              emptyLabel="No Group"
+              formFields={[
+                { name: 'name', label: 'Group Name', type: 'text', required: true, placeholder: 'Enter group name' },
+                { name: 'color', label: 'Color', type: 'color', defaultValue: '#667eea' },
+              ]}
+            />
+            <InlineCreateSelect
+              label="Subgroup"
+              value={subgroupId}
+              onChange={setSubgroupId}
+              options={filteredSubgroups}
+              disabled={!groupId}
+              onCreateNew={async (data) => {
+                const newId = await createSubgroup(run, query, { ...data, group_id: groupId! });
+                return newId;
+              }}
+              onRefresh={loadData}
+              createLabel="Create New Subgroup"
+              emptyLabel="None"
+              requiresParent={true}
+              parentSelected={!!groupId}
+              parentMessage="Please select a group first"
+              formFields={[
+                { name: 'name', label: 'Subgroup Name', type: 'text', required: true, placeholder: 'Enter subgroup name' },
+              ]}
+            />
+            <InlineCreateSelect
+              label="Difficulty"
+              value={difficultyId}
+              onChange={setDifficultyId}
+              options={filteredDifficulties}
+              disabled={!groupId}
+              onCreateNew={async (data) => {
+                const newId = await createDifficultyLevel(run, query, { ...data, group_id: groupId! });
+                return newId;
+              }}
+              onRefresh={loadData}
+              createLabel="Create New Difficulty"
+              emptyLabel="None"
+              requiresParent={true}
+              parentSelected={!!groupId}
+              parentMessage="Please select a group first"
+              formFields={[
+                { name: 'name', label: 'Difficulty Name', type: 'text', required: true, placeholder: 'Enter difficulty name' },
+                { name: 'color', label: 'Color', type: 'color', defaultValue: '#667eea' },
+              ]}
+            />
           </div>
         </div>
 

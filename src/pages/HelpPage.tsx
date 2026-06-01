@@ -1,5 +1,9 @@
+import { useSEO } from '../hooks/useSEO';
+import { SEO_CONFIGS } from '../utils/seo';
 
 export default function HelpPage() {
+  useSEO(SEO_CONFIGS.help);
+  
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 text-slate-200">
       <h1 className="text-2xl font-bold mb-4 text-cyan-400">File Import/Export Guide</h1>

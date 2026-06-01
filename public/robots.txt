@@ -4,12 +4,14 @@
 User-agent: *
 Allow: /
 
-# Disallow admin/edit pages from crawling (if any)
-# Disallow: /test/*/edit
-# Disallow: /manage/
+# Block dynamic test pages (user-specific content)
+Disallow: /test/*/edit
+Disallow: /test/*/mode
+Disallow: /test/*/instant
+Disallow: /test/*/results
+
+# Allow management pages (they have SEO value for returning users)
+Allow: /manage/
 
 # Sitemap
 Sitemap: https://boxtests.com/sitemap.xml
-
-# Crawl-delay (optional, adjust if needed)
-# Crawl-delay: 1

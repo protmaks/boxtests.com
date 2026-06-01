@@ -170,4 +170,11 @@ export const SEO_CONFIGS = {
     url: '/privacy-flashcards',
     type: 'website',
   },
+  help: {
+    title: 'Help & Documentation - BOX-tests',
+    description: 'Learn how to use BOX-tests. Get help with creating tests, managing questions, and understanding local-first features.',
+    keywords: 'help, documentation, how to use, user guide, tutorial, BOX-tests help',
+    url: '/help',
+    type: 'website',
+  },
 } as const;
