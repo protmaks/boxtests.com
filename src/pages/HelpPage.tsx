@@ -4,8 +4,54 @@ import { SEO_CONFIGS } from '../utils/seo';
 export default function HelpPage() {
   useSEO(SEO_CONFIGS.help);
   
+  // FAQ Schema for Rich Snippets
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'How to transfer tests between devices?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'To transfer tests between devices, use Export (JSON).',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What to do if the database does not open?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'If the database does not open, try Clear DB and import JSON.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does the .duckdb format support images?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'The .duckdb format does not support images, use JSON for tests with images.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How to recover from database errors?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'To recover from errors, use Clear DB and import a backup.',
+        },
+      },
+    ],
+  };
+  
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 text-slate-200">
+      {/* FAQ Schema JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      
       <h1 className="text-2xl font-bold mb-4 text-cyan-400">File Import/Export Guide</h1>
       <ul className="mb-6 space-y-4">
         <li>

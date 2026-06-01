@@ -24,7 +24,7 @@
 ## 📋 Optional Next Steps
 
 ### High Priority
-- [ ] Convert og-image.svg to og-image.png (1200x630px)
+- [x] Convert og-image.svg to og-image.png (1200x630px)
 - [ ] Test on Facebook Debugger
 - [ ] Test on Twitter Card Validator
 - [ ] Submit sitemap to Google Search Console
@@ -39,7 +39,7 @@
 
 ### Low Priority
 - [ ] Consider SSR or pre-rendering
-- [ ] Add FAQ schema
+- [x] Add FAQ schema
 - [ ] Optimize images (WebP)
 - [ ] Add service worker
 - [ ] Create blog for content marketing
@@ -53,7 +53,7 @@
 https://boxtests.com/robots.txt
 https://boxtests.com/sitemap.xml
 https://boxtests.com/manifest.json
-https://boxtests.com/og-image.svg
+https://boxtests.com/og-image.png
 ```
 
 ### Test Tools:
