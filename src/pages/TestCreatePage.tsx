@@ -108,6 +108,25 @@ export default function TestCreatePage() {
     );
   };
 
+  const removeOption = (questionId: string, optionIdx: number) => {
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== questionId) return q;
+        // Don't allow removing if only 2 options left
+        if (q.options.length <= 2) return q;
+        const newOptions = q.options.filter((_, idx) => idx !== optionIdx);
+        // Re-assign letters sequentially
+        return {
+          ...q,
+          options: newOptions.map((opt, idx) => ({
+            ...opt,
+            letter: String.fromCharCode(97 + idx),
+          })),
+        };
+      })
+    );
+  };
+
   const removeQuestion = (id: string) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
@@ -347,6 +366,16 @@ export default function TestCreatePage() {
                         className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
                         placeholder={`Option ${opt.letter.toUpperCase()}`}
                       />
+                      {q.options.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => removeOption(q.id, optIdx)}
+                          className="text-red-500 hover:text-red-700 px-2"
+                          title="Remove option"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
                   ))}
                   <button
