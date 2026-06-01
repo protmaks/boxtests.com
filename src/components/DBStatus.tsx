@@ -8,7 +8,43 @@ function formatBytes(bytes: number | null): string {
 }
 
 export function DBStatus() {
-  const { isLoading, error, isInitialized, cacheSize, clearCache } = useDuckDB();
+  const { isLoading, error, isInitialized, cacheSize, clearCache, loadExampleDB } = useDuckDB();
+
+  const handleLoadExample = async () => {
+    const confirmed = confirm(
+      '📦 Load Example Database?\n\n' +
+      'This will replace your current database with example data.\n\n' +
+      '⚠️ Make sure to export your tests first if you want to keep them:\n' +
+      '   1. Click "Export" button\n' +
+      '   2. Select all tests\n' +
+      '   3. Download as JSON\n\n' +
+      'Do you want to continue?'
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+    
+    try {
+      await loadExampleDB();
+      alert(
+        '✅ Example database loaded successfully!\n\n' +
+        'The example database has been loaded.\n' +
+        'Reloading the page now...'
+      );
+      // Give user time to read the message
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (err) {
+      console.error('Failed to load example database:', err);
+      alert(
+        '❌ Failed to load example database\n\n' +
+        'Error: ' + (err instanceof Error ? err.message : String(err)) + '\n\n' +
+        'Check the browser console for more details.'
+      );
+    }
+  };
 
   const handleClearCache = async () => {
     const confirmed = confirm(
@@ -69,12 +105,21 @@ export function DBStatus() {
   if (isInitialized) {
     return (
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-2 text-xs sm:text-sm font-mono px-2 sm:px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg whitespace-nowrap">
-          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-          <span className="text-emerald-400">DuckDB Online</span>
-          {cacheSize !== null &&(
-            <span className="text-emerald-400/70 ml-1">({formatBytes(cacheSize)})</span>
-          )}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-mono px-2 sm:px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg whitespace-nowrap">
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span className="text-emerald-400">DuckDB Online</span>
+            {cacheSize !== null &&(
+              <span className="text-emerald-400/70 ml-1">({formatBytes(cacheSize)})</span>
+            )}
+          </div>
+          <button
+            onClick={handleLoadExample}
+            className="text-xs text-cyan-400 hover:text-cyan-300 underline font-mono px-2 transition-colors"
+            title="Load example database with sample data"
+          >
+            load example
+          </button>
         </div>
         <button
           onClick={handleClearCache}

@@ -24,6 +24,7 @@ interface DuckDBContextValue {
   cacheSize: number | null;
   clearCache: () => Promise<void>;
   refreshCacheSize: () => Promise<void>;
+  loadExampleDB: () => Promise<void>;
 }
 
 const DuckDBContext = createContext<DuckDBContextValue | null>(null);
@@ -457,6 +458,69 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
     }
   }, [db, conn]);
 
+  const loadExampleDB = useCallback(async (): Promise<void> => {
+    if (!db || !conn) throw new Error('Database not initialized');
+
+    try {
+      console.log('Loading example database...');
+      const response = await fetch('/empty_db.duckdb');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch example database: ${response.status}`);
+      }
+      
+      const buffer = await response.arrayBuffer();
+      const uint8Array = new Uint8Array(buffer);
+      console.log(`Example database loaded: ${uint8Array.length} bytes`);
+
+      // Flush any pending writes first
+      await db.flushFiles();
+      
+      // Close connection
+      await conn.close();
+      console.log('Connection closed');
+      
+      // Close the database to release WAL lock
+      await db.open({ path: ':memory:' });
+      
+      // Now drop the old files
+      await db.dropFile('data.duckdb').catch(() => {});
+      await db.dropFile('data.duckdb.wal').catch(() => {});
+      console.log('Old files dropped');
+      
+      // Wait a bit for cleanup
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Register and open new file
+      await db.registerFileBuffer('data.duckdb', uint8Array);
+      console.log('New file registered');
+      
+      await db.open({
+        path: 'data.duckdb',
+        accessMode: duckdb.DuckDBAccessMode.READ_WRITE,
+      });
+      console.log('Database opened');
+
+      const newConn = await db.connect();
+      console.log('New connection created');
+      
+      // Verify database is valid by running a simple query
+      await newConn.query('SELECT 1');
+      console.log('Database verified');
+      
+      setConn(newConn);
+      setHasUnsavedChanges(false);
+
+      // Save to OPFS immediately with the new connection
+      await saveToOPFS(db, newConn);
+      const size = await getOPFSCacheSize();
+      setCacheSize(size);
+      console.log('Example database loaded successfully, saved to OPFS');
+    } catch (err) {
+      console.error('Failed to load example database:', err);
+      throw err;
+    }
+  }, [db, conn]);
+
   return (
     <DuckDBContext.Provider
       value={{
@@ -474,6 +538,7 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
         cacheSize,
         clearCache,
         refreshCacheSize,
+        loadExampleDB,
       }}
     >
       {children}
