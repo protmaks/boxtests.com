@@ -139,7 +139,7 @@ function AppContent() {
           <span className="text-cyan-400/80">BOX-tests © 2025</span>
         </div>
         <div className="mt-2 text-xs text-slate-500 font-mono tracking-wider">
-          GEOMETRIC PRECISION TESTING
+          100% Local. 100% Private.
         </div>
       </footer>
     </div>

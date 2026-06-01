@@ -5,7 +5,7 @@ import { getAllGroups, getAllSubgroups, getAllDifficultyLevels } from '../db/que
 import { getTestWithQuestions } from '../db/queries/tests';
 import { updateTest } from '../db/mutations/tests';
 import { createQuestion, updateQuestion, deleteQuestion } from '../db/mutations/questions';
-import type { TestGroup, TestSubgroup, DifficultyLevel, QuestionWithOptions } from '../types/quiz';
+import type { TestGroup, TestSubgroup, DifficultyLevel } from '../types/quiz';
 import { useSEO } from '../hooks/useSEO';
 import { RichTextEditor } from '../components/RichTextEditor';
 

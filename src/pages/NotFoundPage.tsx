@@ -40,7 +40,7 @@ export default function NotFoundPage() {
         {/* Description */}
         <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-slide-in" style={{ animationDelay: '0.3s' }}>
           The page you're looking for doesn't exist or has been moved. 
-          Let's get you back on track with geometric precision.
+          Let's get you back on track.
         </p>
 
         {/* CTA Button */}

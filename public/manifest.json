@@ -1,7 +1,7 @@
 {
-  "name": "BOX-tests - Infrastructure for Knowledge",
+  "name": "BOX-tests - Self-Testing Made Simple",
   "short_name": "BOX-tests",
-  "description": "A self-testing application built with geometric precision. Create tests, take them, and track your progress with blazing-fast local analytics.",
+  "description": "Create tests, take them, and track your progress — all stored locally on your device. No accounts, no cloud, instant results.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

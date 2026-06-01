@@ -113,9 +113,9 @@ function updateLinkTag(rel: string, href: string): void {
  */
 export const SEO_CONFIGS = {
   home: {
-    title: 'BOX-tests - Infrastructure for Knowledge | Self-Testing Platform',
-    description: 'Create, manage, and take tests with blazing-fast local analytics. A self-testing application built with DuckDB WASM for instant performance and 100% local-first experience.',
-    keywords: 'testing platform, self-testing, quiz app, knowledge assessment, DuckDB WASM, local-first, test creation, online tests, study platform',
+    title: 'BOX-tests - Self-Testing Made Simple | Privacy-First Quiz Platform',
+    description: 'Create tests, take them, and track your progress — all stored locally on your device. No accounts, no cloud, instant results. Privacy-first self-testing platform.',
+    keywords: 'self-testing, quiz app, local-first, privacy-first, offline testing, test creation, study platform, flashcards, knowledge assessment, no account required',
     url: '/',
     type: 'website',
   },
