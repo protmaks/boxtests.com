@@ -36,6 +36,32 @@ export async function clearSession(run: RunFn, testId: number): Promise<void> {
   await run(`DELETE FROM test_current_session WHERE test_id = ${testId}`);
 }
 
+export async function clearIncorrectAnswers(
+  run: RunFn,
+  testId: number,
+  questionIndexes: number[]
+): Promise<void> {
+  if (questionIndexes.length === 0) return;
+  
+  const indexes = questionIndexes.join(',');
+  await run(`
+    DELETE FROM test_current_session 
+    WHERE test_id = ${testId} 
+    AND question_index IN (${indexes})
+  `);
+}
+
+export async function clearDontKnowAnswers(
+  run: RunFn,
+  testId: number
+): Promise<void> {
+  await run(`
+    DELETE FROM test_current_session 
+    WHERE test_id = ${testId} 
+    AND (answer_json = '[]' OR answer_json IS NULL OR is_answered = FALSE)
+  `);
+}
+
 export async function getSessionProgress(
   query: QueryFn,
   testId: number
