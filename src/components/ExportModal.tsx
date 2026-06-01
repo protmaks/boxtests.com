@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useDuckDB } from '../context/DuckDBContext';
+import { useNotification } from '../context/NotificationContext';
 import { getTestsGrouped } from '../db/queries/tests';
 import type { Test } from '../types/quiz';
 
@@ -13,6 +14,7 @@ interface ExportModalProps {
 
 export function ExportModal({ isOpen, onClose }: ExportModalProps) {
   const { query, conn, db } = useDuckDB();
+  const { showNotification } = useNotification();
   const [groups, setGroups] = useState<
     { group_id: number | null; group_name: string | null; group_color: string | null; tests: Test[] }[]
   >([]);
@@ -90,7 +92,12 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
       onClose();
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Failed to export tests: ' + (err instanceof Error ? err.message : String(err)));
+      showNotification(
+        'error',
+        'Export Failed',
+        err instanceof Error ? err.message : String(err),
+        6000
+      );
     } finally {
       setExporting(false);
     }
@@ -150,19 +157,21 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      showNotification('success', 'Export Successful!', `Exported ${Array.from(selectedTests).length} test(s) as JSON`, 4000);
     } catch (err) {
       console.error('JSON export error:', err);
       
       // Provide helpful error message
       if (err instanceof Error && err.message.includes('checksum')) {
-        throw new Error(
+        const errorMsg = 
           'Database corruption detected. Your database file is corrupted.\n\n' +
           'Try these steps:\n' +
           '1. Click "Clear Database" to start fresh\n' +
           '2. Recreate your tests\n' +
           '3. Use Export → JSON regularly for backups\n' +
-          '4. Avoid using Save button for tests with images'
-        );
+          '4. Avoid using Save button for tests with images';
+        throw new Error(errorMsg);
       }
       throw err;
     }
@@ -242,6 +251,8 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    showNotification('success', 'Export Successful!', `Exported ${Array.from(selectedTests).length} test(s) as TXT`, 4000);
   };
 
   if (!isOpen) return null;

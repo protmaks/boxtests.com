@@ -1,4 +1,5 @@
 import { useDuckDB } from '../context/DuckDBContext';
+import { useNotification } from '../context/NotificationContext';
 
 function formatBytes(bytes: number | null): string {
   if (bytes === null || bytes === 0) return '0 KB';
@@ -9,76 +10,84 @@ function formatBytes(bytes: number | null): string {
 
 export function DBStatus() {
   const { isLoading, error, isInitialized, cacheSize, clearCache, loadExampleDB } = useDuckDB();
+  const { showNotification, showConfirm } = useNotification();
 
   const handleLoadExample = async () => {
-    const confirmed = confirm(
-      '📦 Load Example Database?\n\n' +
-      'This will replace your current database with example data.\n\n' +
-      '⚠️ Make sure to export your tests first if you want to keep them:\n' +
-      '   1. Click "Export" button\n' +
-      '   2. Select all tests\n' +
-      '   3. Download as JSON\n\n' +
-      'Do you want to continue?'
-    );
-    
-    if (!confirmed) {
-      return;
-    }
-    
-    try {
-      await loadExampleDB();
-      alert(
-        '✅ Example database loaded successfully!\n\n' +
-        'The example database has been loaded.\n' +
-        'Reloading the page now...'
-      );
-      // Give user time to read the message
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch (err) {
-      console.error('Failed to load example database:', err);
-      alert(
-        '❌ Failed to load example database\n\n' +
-        'Error: ' + (err instanceof Error ? err.message : String(err)) + '\n\n' +
-        'Check the browser console for more details.'
-      );
-    }
+    showConfirm({
+      title: 'Load Example Database?',
+      message: 
+        'This will replace your current database with example data.\n\n' +
+        'IMPORTANT: Make sure to export your tests first if you want to keep them:\n' +
+        '   1. Click "Export" button\n' +
+        '   2. Select all tests\n' +
+        '   3. Download as JSON\n\n' +
+        'Do you want to continue?',
+      type: 'warning',
+      confirmText: 'Load Example',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        try {
+          await loadExampleDB();
+          showNotification(
+            'success',
+            'Example database loaded!',
+            'The example database has been loaded. Reloading the page...',
+            2000
+          );
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        } catch (err) {
+          console.error('Failed to load example database:', err);
+          showNotification(
+            'error',
+            'Failed to load example database',
+            'Error: ' + (err instanceof Error ? err.message : String(err)) + '\n\nCheck the browser console for more details.',
+            6000
+          );
+        }
+      },
+    });
   };
 
   const handleClearCache = async () => {
-    const confirmed = confirm(
-      '🗑️ Clear Database?\n\n' +
-      'This will DELETE ALL your tests and data!\n\n' +
-      '⚠️ Make sure to export your tests first:\n' +
-      '   1. Click "Export" button\n' +
-      '   2. Select all tests\n' +
-      '   3. Download as JSON\n\n' +
-      '💡 Use this to fix:\n' +
-      '   • "Database corruption" errors\n' +
-      '   • "Checksum" errors\n' +
-      '   • "Memory access out of bounds" errors\n' +
-      '   • Other database issues\n\n' +
-      'Do you want to continue?'
-    );
-    
-    if (!confirmed) {
-      return;
-    }
-    
-    try {
-      await clearCache();
-      alert(
-        '✅ Database cleared successfully!\n\n' +
-        'The database has been reset to initial state.\n' +
-        'You can now:\n' +
-        '• Create new tests\n' +
-        '• Import from JSON files'
-      );
-    } catch (err) {
-      console.error('Failed to clear cache:', err);
-      alert('Failed to clear database: ' + (err instanceof Error ? err.message : String(err)));
-    }
+    showConfirm({
+      title: 'Clear Database?',
+      message: 
+        'This will DELETE ALL your tests and data!\n\n' +
+        'IMPORTANT: Make sure to export your tests first:\n' +
+        '   1. Click "Export" button\n' +
+        '   2. Select all tests\n' +
+        '   3. Download as JSON\n\n' +
+        'Use this to fix:\n' +
+        '   • "Database corruption" errors\n' +
+        '   • "Checksum" errors\n' +
+        '   • "Memory access out of bounds" errors\n' +
+        '   • Other database issues\n\n' +
+        'Do you want to continue?',
+      type: 'danger',
+      confirmText: 'Clear Database',
+      cancelText: 'Cancel',
+      onConfirm: async () => {
+        try {
+          await clearCache();
+          showNotification(
+            'success',
+            'Database cleared!',
+            'The database has been reset to initial state.\nYou can now:\n• Create new tests\n• Import from JSON files',
+            5000
+          );
+        } catch (err) {
+          console.error('Failed to clear cache:', err);
+          showNotification(
+            'error',
+            'Failed to clear database',
+            err instanceof Error ? err.message : String(err),
+            6000
+          );
+        }
+      },
+    });
   };
 
   if (isLoading) {
@@ -96,7 +105,9 @@ export function DBStatus() {
   if (error) {
     return (
       <div className="flex items-center gap-2 text-sm font-mono text-rose-400 px-3 py-1.5 bg-rose-500/10 border border-rose-500/30 rounded-lg">
-        <span className="text-lg">⚠</span>
+        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
         <span>DB Error: {error.message}</span>
       </div>
     );

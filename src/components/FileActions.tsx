@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { useDuckDB } from '../context/DuckDBContext';
+import { useNotification } from '../context/NotificationContext';
 import { ExportModal } from './ExportModal';
 
 interface ExportedData {
@@ -19,9 +20,9 @@ interface FileActionsProps {
 
 export function FileActions({ onImportSuccess, children }: FileActionsProps) {
   const { importFromFile, exportToBlob, isLoading, run, query } = useDuckDB();
+  const { showNotification, showConfirm } = useNotification();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showExportModal, setShowExportModal] = useState(false);
-  // Help modal state removed
 
   const escapeSQL = (val: unknown): string => {
     if (val === null || val === undefined) return 'NULL';
@@ -50,28 +51,32 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
       
       // Provide more helpful error messages
       if (errorMessage.includes('not a valid DuckDB database')) {
-        alert(
-          '⚠️ Import Failed: Invalid Database File\n\n' +
+        showNotification(
+          'error',
+          'Import Failed: Invalid Database File',
           'The selected file cannot be opened as a DuckDB database.\n\n' +
-          '💡 Common causes:\n' +
+          'Common causes:\n' +
           '• File contains tests with images (not supported in .duckdb)\n' +
           '• File was created on a different device/browser\n' +
           '• File is corrupted or incomplete\n\n' +
-          '✅ Solution: Use "Export" button instead\n' +
+          'SOLUTION: Use "Export" button instead\n' +
           '• Creates portable JSON files\n' +
           '• Works perfectly with images\n' +
-          '• Compatible across all devices'
+          '• Compatible across all devices',
+          8000
         );
       } else if (errorMessage.includes('Invalid export file format')) {
-        alert(
-          '⚠️ Import Failed: Invalid JSON Format\n\n' +
+        showNotification(
+          'error',
+          'Import Failed: Invalid JSON Format',
           'The selected JSON file is not in the correct format.\n\n' +
-          'Please use a JSON file created by this app\'s "Export" feature.'
+          'Please use a JSON file created by this app\'s "Export" feature.',
+          6000
         );
       } else if (errorMessage.includes('empty')) {
-        alert('⚠️ Import Failed: The selected file is empty.');
+        showNotification('error', 'Import Failed', 'The selected file is empty.', 4000);
       } else {
-        alert('⚠️ Import Failed\n\n' + errorMessage);
+        showNotification('error', 'Import Failed', errorMessage, 6000);
       }
     }
 
@@ -174,7 +179,7 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
       `);
     }
 
-    alert(`Successfully imported ${data.tests.length} test(s)!`);
+    showNotification('success', 'Import Successful!', `Successfully imported ${data.tests.length} test(s)!`, 4000);
   };
 
   const handleExport = async () => {
@@ -183,43 +188,29 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
       const hasImages = await checkForImages();
       
       if (hasImages) {
-        const userConfirmed = confirm(
-          '⚠️ Warning: Your tests contain images!\n\n' +
-          'The .duckdb file may not work reliably with images.\n\n' +
-          '✅ RECOMMENDED: Use "Export" button instead\n' +
-          '   • Select tests and export as JSON\n   •• JSON format works perfectly with images\n' +
-          '   • More reliable for backup and sharing\n\n' +
-          'Do you still want to save as .duckdb?\n' +
-          '(Click Cancel to use Export instead)'
-        );
-        
-        if (!userConfirmed) {
-          // User chose to use Export instead
-          setShowExportModal(true);
-          return;
-        }
+        showConfirm({
+          title: 'Warning: Your tests contain images!',
+          message: 
+            'The .duckdb file may not work reliably with images.\n\n' +
+            'RECOMMENDED: Use "Export" button instead\n' +
+            '   • Select tests and export as JSON\n' +
+            '   • JSON format works perfectly with images\n' +
+            '   • More reliable for backup and sharing\n\n' +
+            'Do you still want to save as .duckdb?',
+          type: 'warning',
+          confirmText: 'Continue with .duckdb',
+          cancelText: 'Use Export Instead',
+          onConfirm: async () => {
+            await performExport();
+          },
+          onCancel: () => {
+            setShowExportModal(true);
+          },
+        });
+        return;
       }
       
-      // console.log('Starting database export...');
-      const blob = await exportToBlob();
-      
-      // Validate blob size
-      if (blob.size === 0) {
-        throw new Error('Failed to create database file (empty file)');
-      }
-      
-      // console.log(`Database file created: ${Math.round(blob.size / 1024)}KB`);
-      
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `pm_tester_${new Date().toISOString().split('T')[0]}.duckdb`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      // console.log('Database file downloaded successfully');
+      await performExport();
     } catch (err) {
       console.error('Export failed:', err);
       
@@ -227,8 +218,8 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
       let userMessage = 'Failed to save database:\n\n' + errorMessage;
       
       // Add context-specific help
-      if (!errorMessage.includes('💡')) {
-        userMessage += '\n\n💡 Recommendations:\n';
+      if (!errorMessage.includes('Try:')) {
+        userMessage += '\n\nRecommendations:\n';
         
         if (errorMessage.includes('empty')) {
           userMessage += '• Database file is empty\n';
@@ -244,8 +235,28 @@ export function FileActions({ onImportSuccess, children }: FileActionsProps) {
         userMessage += '• JSON export is more reliable and portable';
       }
       
-      alert(userMessage);
+      showNotification('error', 'Export Failed', userMessage, 8000);
     }
+  };
+
+  const performExport = async () => {
+    const blob = await exportToBlob();
+    
+    // Validate blob size
+    if (blob.size === 0) {
+      throw new Error('Failed to create database file (empty file)');
+    }
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pm_tester_${new Date().toISOString().split('T')[0]}.duckdb`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('success', 'Database Saved!', `File size: ${Math.round(blob.size / 1024)}KB`, 4000);
   };
 
   const checkForImages = async (): Promise<boolean> => {

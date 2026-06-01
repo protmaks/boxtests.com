@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
 import { DuckDBProvider } from './context/DuckDBContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { FileActions } from './components/FileActions';
 import { DBStatus } from './components/DBStatus';
 import { useBeforeUnload } from './hooks/useBeforeUnload';
@@ -148,7 +149,9 @@ function AppContent() {
 function App() {
   return (
     <DuckDBProvider>
-      <AppContent />
+      <NotificationProvider>
+        <AppContent />
+      </NotificationProvider>
     </DuckDBProvider>
   );
 }
