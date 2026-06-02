@@ -120,21 +120,11 @@
   ```bash
   npm install @duckdb/duckdb-wasm
   ```
-- [ ] Copy WASM files to `public/duckdb/`
-  ```bash
-  mkdir -p public/duckdb
-  cp node_modules/@duckdb/duckdb-wasm/dist/*.wasm public/duckdb/
-  cp node_modules/@duckdb/duckdb-wasm/dist/*.worker.js public/duckdb/
-  ```
+- [x] Use jsDelivr CDN for WASM bundles (no local copy needed)
 
 ### 1.2 DuckDB Web Worker
-- [ ] Create `src/workers/duckdb.worker.ts`
-- [ ] Configure Vite for Web Workers (vite.config.ts)
-- [ ] Implement message passing protocol:
-  - [ ] `INIT` - DB initialization
-  - [ ] `QUERY` - SQL execution
-  - [ ] `IMPORT` - load .duckdb file
-  - [ ] `EXPORT` - export .duckdb file
+- [x] Using jsDelivr CDN worker (no custom worker needed)
+- [x] DuckDB handles worker internally via AsyncDuckDB
 
 ### 1.3 DuckDB Context Provider
 - [x] Create `src/context/DuckDBContext.tsx`
@@ -149,7 +139,7 @@
     query: <T>(sql: string, params?: any[]) => Promise<T[]>;
   }
   ```
-- [ ] Add Provider to App.tsx
+- [x] Add Provider to App.tsx
 
 ### 1.4 Database Schema
 - [x] Create `src/db/schema.ts` with DDL
@@ -194,16 +184,16 @@
   ```
 
 ### 1.8 DuckDB Testing
-- [ ] Create test page to verify:
-  - [ ] DB initialization
-  - [ ] SELECT execution
-  - [ ] Loading .duckdb file
-  - [ ] Exporting .duckdb file
-  - [ ] Saving to OPFS
-  - [ ] Loading from OPFS after reload
+- [x] Verified working:
+  - [x] DB initialization
+  - [x] SELECT execution
+  - [x] Loading .duckdb file
+  - [x] Exporting .duckdb file
+  - [x] Saving to OPFS
+  - [x] Loading from OPFS after reload
 
 **✅ M1 Completion Criteria:**
-- [ ] DuckDB initializes in Web Worker without blocking UI
+- [x] DuckDB initializes in Web Worker without blocking UI
 - [x] Can load .duckdb file via file input
 - [x] Can execute SELECT and display results
 - [x] Can export database back to .duckdb file
@@ -284,16 +274,16 @@
 
 ### 2.9 Unsaved Changes Warning
 - [x] Create `src/hooks/useBeforeUnload.ts`
-- [ ] Create `src/hooks/useUnsavedChanges.ts`
-- [ ] Add `hasUnsavedChanges` flag to context
-- [ ] Show warning when closing tab
+- [x] Create `src/hooks/useUnsavedChanges.ts` (integrated in DuckDBContext)
+- [x] Add `hasUnsavedChanges` flag to context
+- [x] Show warning when closing tab
 
 **✅ M2 Completion Criteria:**
 - [ ] User can sign in via Google
 - [ ] Google Picker opens and allows selecting .duckdb files
 - [ ] Selected file downloads and loads into DuckDB WASM
 - [ ] Changes can be saved back to the same Drive file
-- [ ] beforeunload warns about unsaved changes
+- [x] beforeunload warns about unsaved changes
 
 ---
 
@@ -331,9 +321,9 @@
   - [x] `evaluateSingleChoice(userAnswer, correctAnswer)`
   - [x] `evaluateMultipleChoice(userAnswers, correctAnswers)`
   - [x] `calculateScore(answers, totalQuestions)`
-- [ ] Create `src/quiz/statistics.ts`
-  - [ ] `updateTestStatistics(testId, results)`
-  - [ ] `calculateAverageScore()`
+- [x] Statistics update (in `src/db/queries/statistics.ts`)
+  - [x] `updateStatistics(testId, results)`
+  - [x] Statistics tracking per test
 
 ### 3.4 Session Management
 - [x] Create `src/db/queries/session.ts`
@@ -357,9 +347,9 @@
 ### 3.6 UI Components - Statistics
 - [x] Create `src/components/InstantStats.tsx`
   - [x] Correct / Incorrect / Don't know / Unanswered
-- [ ] Create `src/components/TestResultsSummary.tsx`
-  - [ ] Final percentage
-  - [ ] Question-by-question breakdown
+- [x] TestResultsSummary functionality (integrated in TestResultsPage)
+  - [x] Final percentage
+  - [x] Question-by-question breakdown
 
 ### 3.7 TestListPage
 - [x] Implement `src/pages/TestListPage.tsx`
@@ -415,21 +405,21 @@
 **Goal**: CRUD for tests, groups, questions
 
 ### 4.1 Rich Text Editor
-- [ ] Install TipTap or Quill
+- [x] Install TipTap
   ```bash
   npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
   ```
-- [ ] Create `src/components/RichTextEditor.tsx`
-  - [ ] Toolbar with basic formatting
-  - [ ] Image support (Base64)
-  - [ ] HTML output
+- [x] Create `src/components/RichTextEditor.tsx`
+  - [x] Toolbar with basic formatting
+  - [x] Image support (Base64)
+  - [x] HTML output
 
 ### 4.2 Question Editor Component
-- [ ] Create `src/components/QuestionEditor.tsx`
-  - [ ] Question text (rich text)
-  - [ ] Add/remove options
-  - [ ] Mark correct answers
-  - [ ] Explanation (rich text)
+- [x] Integrated in TestCreatePage/TestEditPage
+  - [x] Question text (rich text via RichTextEditor)
+  - [x] Add/remove options
+  - [x] Mark correct answers
+  - [x] Explanation (rich text)
   - [ ] Drag-and-drop for sorting
 
 ### 4.3 DB Mutations
@@ -497,12 +487,12 @@
   - [ ] Save to DB
 
 **✅ M4 Completion Criteria:**
-- [ ] Can create new test with questions manually
-- [ ] Can edit existing questions
-- [ ] Can manage groups and subgroups
-- [ ] Can manage difficulty levels
+- [x] Can create new test with questions manually
+- [x] Can edit existing questions
+- [x] Can manage groups and subgroups
+- [x] Can manage difficulty levels
 - [ ] Can import TXT file with questions
-- [ ] Rich text editor works for questions and explanations
+- [x] Rich text editor works for questions and explanations
 
 ---
 
@@ -647,10 +637,12 @@
 - [ ] Bundle size optimization
 
 ### 7.9 Final Polish
-- [ ] Favicon and meta tags
-- [ ] Loading states everywhere
-- [ ] Empty states
-- [ ] 404 page
+- [x] Favicon and meta tags
+- [x] Loading states everywhere
+- [x] Empty states
+- [x] 404 page (styled NotFoundPage)
+- [x] HelpPage with FAQ schema
+- [x] SEO landing pages (SelfStudyQuizMaker, OfflineTestCreator, PrivacyFlashcards)
 - [ ] README.md update
 
 **✅ M7 Completion Criteria:**
@@ -675,8 +667,6 @@
 
 ### Future Improvements
 - [ ] PWA manifest for installation
-- [ ] Dark theme
-- [ ] Keyboard shortcuts
 - [ ] Export to PDF
 - [ ] Test sharing
 
@@ -687,13 +677,19 @@
 | Milestone | Status | Start Date | Completion Date |
 |-----------|--------|------------|-----------------|
 | M0: Scaffolding | ✅ Completed | | |
-| M1: DuckDB WASM | 🟡 In Progress (90%) | | |
+| M1: DuckDB WASM | ✅ Completed | | |
 | M2: Google Drive | ⬜ Not Started | | |
 | M3: Quiz Engine | ✅ Completed | | |
-| M4: Test Management | 🟡 In Progress (70%) | | |
+| M4: Test Management | 🟡 In Progress (90%) | | |
 | M5: AI Explanations | ⬜ Not Started | | |
 | M6: Migration | ⬜ Not Started | | |
-| M7: Testing | ⬜ Not Started | | |
+| M7: Testing | 🟡 In Progress (20%) | | |
+
+**Extra Features (not in original roadmap):**
+- ✅ SEO landing pages
+- ✅ HelpPage with FAQ schema
+- ✅ useSEO hook
+- ✅ Animated 404 page
 
 **Legend:**
 - ⬜ Not Started
@@ -703,58 +699,73 @@
 **Detailed Status:**
 
 ### M0: Scaffolding ✅
-- Полностью завершен: React + Vite + TypeScript + Tailwind CSS
-- Все страницы созданы
-- Роутинг настроен
-- GitHub Pages deployment работает
+- Fully completed: React + Vite + TypeScript + Tailwind CSS
+- All pages created
+- Routing configured
+- GitHub Pages deployment works
 
-### M1: DuckDB WASM 🟡 90%
-**Выполнено:**
-- ✅ DuckDB WASM установлен и инициализирован
-- ✅ DuckDB Context Provider создан
-- ✅ Database Schema реализована
-- ✅ File Import/Export работает
-- ✅ OPFS Persistence реализовано
-- ✅ useDB Hook создан
+### M1: DuckDB WASM ✅
+**Completed:**
+- ✅ DuckDB WASM installed and initialized (jsDelivr CDN)
+- ✅ DuckDB Context Provider created
+- ✅ Database Schema implemented
+- ✅ File Import/Export works
+- ✅ OPFS Persistence implemented
+- ✅ useDB Hook created
+- ✅ Web Worker works via AsyncDuckDB
 
-**Осталось:**
-- ⬜ Перенести инициализацию в Web Worker (optional - работает и так)
-- ⬜ Fallback на IndexedDB для браузеров без OPFS
+**Optional:**
+- ⬜ Fallback to IndexedDB for browsers without OPFS (low priority)
 
 ### M2: Google Drive ⬜
-Не начато
+Not started (only beforeunload warning implemented)
 
 ### M3: Quiz Engine ✅
-**Полностью реализовано:**
+**Fully implemented:**
 - ✅ Types & Interfaces
 - ✅ Database Queries (tests, groups, statistics, session)
 - ✅ Quiz Business Logic (evaluate, scoring)
 - ✅ Session Management
 - ✅ UI Components (QuestionCard, OptionList, ProgressBar, InstantStats, QuestionNav, ExplanationBox)
-- ✅ TestListPage с группировкой
+- ✅ TestListPage with grouping
 - ✅ TestModeSelector
-- ✅ TestSinglePage (одна страница)
+- ✅ TestSinglePage (single page mode)
 - ✅ TestInstantPage (instant mode)
 - ✅ TestResultsPage
 
-### M4: Test Management 🟡 70%
-**Выполнено:**
+### M4: Test Management 🟡 90%
+**Completed:**
+- ✅ Rich Text Editor (TipTap) for questions and explanations
 - ✅ DB Mutations (tests, questions, groups)
 - ✅ TestCreatePage
 - ✅ TestEditPage
 - ✅ ManageGroupsPage
 - ✅ ManageDifficultyPage
 
-**Осталось:**
-- ⬜ Rich Text Editor (TipTap/Quill) для вопросов
+**Remaining:**
 - ⬜ TXT Import Parser
 - ⬜ ImportTestPage
+- ⬜ Drag-and-drop for question sorting
 
 ### M5: AI Explanations ⬜
-Не начато
+Not started
 
 ### M6: Migration ⬜
-Не начато
+Not started
 
-### M7: Testing & Polish ⬜
-Не начато
+### M7: Testing & Polish 🟡 20%
+**Completed:**
+- ✅ 404 page (styled NotFoundPage)
+- ✅ Favicon and meta tags
+- ✅ Loading states
+- ✅ Empty states
+- ✅ HelpPage with FAQ schema
+- ✅ SEO landing pages
+
+**Remaining:**
+- ⬜ Unit tests (Vitest)
+- ⬜ E2E tests (Playwright)
+- ⬜ Mobile responsiveness testing
+- ⬜ Browser compatibility testing
+- ⬜ Error boundary
+- ⬜ Code splitting / lazy loading
